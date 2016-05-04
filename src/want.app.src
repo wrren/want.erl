@@ -1,0 +1,14 @@
+{application, want,
+ [
+  {description, "Simple library for converting between types conveniently"},
+  {vsn, "1"},
+  {modules, [
+             want
+            ]},
+  {registered, []},
+  {applications, [
+                  kernel,
+                  stdlib
+                 ]},
+  {env, []}
+ ]}.
