@@ -27,6 +27,8 @@ string( V ) when is_list( V )		    -> V.
 %%
 boolean( true )							-> true;
 boolean( false )						-> false;
+boolean( 1 )                            -> true;
+boolean( 0 )                            -> false;
 boolean( <<"true">> )					-> true;
 boolean( <<"false">> )					-> false;
 boolean( "true" )						-> true;
