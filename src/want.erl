@@ -39,6 +39,7 @@ boolean( "false" )						-> false.
 %%  Convert the given value to an integer
 %%
 integer( V ) when is_integer( V )       -> V;
+integer( V ) when is_float( V )			-> list_to_integer( float_to_list( V, [{ decimals, 0 } ] ) );
 integer( true )                         -> 1;
 integer( false )                        -> 0;
 integer( V ) when is_atom( V )          -> integer( atom_to_binary( V, unicode ) );

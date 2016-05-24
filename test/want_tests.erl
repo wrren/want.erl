@@ -10,4 +10,5 @@ want_test() ->
 	?assert( want:boolean( true )		=:=	true ),
 	?assert( want:float( <<"1.0">> )	=:= 1.0 ),
 	?assert( want:string( hello )		=:= "hello" ),
+	?assert( want:integer( 1.23 ) 		=:= 1 ),
 	?assert( want:integer( <<"1">> )	=:= 1 ).
