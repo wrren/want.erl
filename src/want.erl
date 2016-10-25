@@ -1,10 +1,20 @@
 -module( want ).
 -author( "Warren Kenny <warren.kenny@gmail.com>" ).
 
--export( [boolean/1, string/1, binary/1, integer/1, float/1] ).
+-export( [atom/1, boolean/1, string/1, binary/1, integer/1, float/1] ).
 
 %%
-%%	Convert the given value to a binary
+%%  @doc Convert the given value to an atom
+%%
+-spec atom( any() ) -> atom().
+atom( V ) when is_atom( V )             -> V;
+atom( V ) when is_binary( V )           -> binary_to_atom( V, utf8 );
+atom( V ) when is_list( V )             -> list_to_atom( V );
+atom( V ) when is_integer( V )          -> want:atom( integer_to_list( V ) );
+atom( V ) when is_float( V )            -> want:atom( float_to_list( V ) ).
+
+%%
+%%	@doc Convert the given value to a binary
 %%
 -spec binary( any() ) -> binary().
 binary( V ) when is_binary( V ) 	    -> V;
@@ -15,7 +25,7 @@ binary( V ) when is_list( V )		    -> list_to_binary( V );
 binary( V )							    -> term_to_binary( V ).
 
 %%
-%%	Convert the given value to a string
+%%	@doc Convert the given value to a string
 %%
 -spec string( any() ) -> string().
 string( true )							-> "true";
@@ -27,7 +37,7 @@ string( V ) when is_binary( V )		    -> binary_to_list( V );
 string( V ) when is_list( V )		    -> V.
 
 %%
-%%	Convert the given value to a boolean
+%%	@doc Convert the given value to a boolean
 %%
 -spec boolean( any() ) -> boolean().
 boolean( true )							-> true;
@@ -40,7 +50,7 @@ boolean( "true" )						-> true;
 boolean( "false" )						-> false.
 
 %%
-%%  Convert the given value to an integer
+%%  @doc Convert the given value to an integer
 %%
 -spec integer( any() ) -> integer().
 integer( V ) when is_integer( V )       -> V;
@@ -52,7 +62,7 @@ integer( V ) when is_binary( V )        -> binary_to_integer( V );
 integer( V ) when is_list( V )          -> list_to_integer( V ).
 
 %%
-%%  Convert the given value to an float
+%%  @doc Convert the given value to an float
 %%
 -spec float( any() ) -> float().
 float( V ) when is_float( V )           -> V;
