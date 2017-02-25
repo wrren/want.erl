@@ -7,7 +7,7 @@ want_test() ->
 	?assert( want:atom( "hello" )		=:= hello ),
 	?assert( want:atom( <<"hello">> ) 	=:= hello ),
 	?assert( want:atom( 1 )				=:= '1' ),
-	?assertEqual( want:atom( 1.5 ), 	'1.5' ),
+	?assertEqual( want:atom( 1.5, 1 ), 	'1.5' ),
     ?assert( want:string( 1 ) 			=:= "1" ),
 	?assert( want:integer( "1" )		=:= 1 ),
 	?assert( want:binary( 1 ) 			=:= <<"1">> ),
