@@ -1,14 +1,21 @@
 {application, want,
  [
-  {description, "Simple library for converting between types conveniently"},
-  {vsn, "0.1.0"},
-  {modules, [
-             want
-            ]},
-  {registered, []},
-  {applications, [
-                  kernel,
-                  stdlib
-                 ]},
-  {env, []}
+  { description, "Simple library for converting between types conveniently" },
+  { vsn, "1.0.0" },
+  { registered, [] },
+  { applications,
+  [
+    kernel,
+    stdlib
+  ]},
+  { env,[] },
+  { modules, [] },
+  { maintainers, ["Warren Kenny"] },
+  { licenses, [
+    "MIT"
+  ]},
+  { links, 
+  [
+    {"GitHub", "https://github.com/wrren/want.erl"}
+  ]}
  ]}.
