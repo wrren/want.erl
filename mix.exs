@@ -6,11 +6,26 @@ defmodule Want.MixProject do
       app:      :want,
       version:  "1.1.0",
       elixir:   "~> 1.0",
-      deps:     deps()
+      deps:     deps(),
+      description: description(),
+      package: package()
     ]
   end
 
   def deps do
     [{:dialyxir, "~> 0.4", only: [:dev]}]
+  end
+
+  def description do
+    "Type conversion library for Erlang and Elixir."
+  end
+
+  def package do
+    [
+      name: "want",
+      maintainers: ["Warren Kenny"],
+      licenses: ["MIT"],
+      links: %{"GitHub" => "https://github.com/wrren/want.erl"}
+    ]
   end
 end
