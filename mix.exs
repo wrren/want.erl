@@ -13,7 +13,10 @@ defmodule Want.MixProject do
   end
 
   def deps do
-    [{:dialyxir, "~> 0.4", only: [:dev]}]
+    [
+      {:dialyxir, "~> 0.4", only: [:dev]},
+      {:ex_doc, ">= 0.0.0", only: :dev, runtime: false}
+    ]
   end
 
   def description do
