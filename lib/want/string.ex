@@ -13,6 +13,7 @@ defmodule Want.String do
 
     * `:max` - Maximum allowable string length.
     * `:min` - Minimum allowable string length.
+    * ':decode' - Currently only supports :uri; runs URI.decode on the input value
     * `:matches` - The resulting string must match the given regex.
 
   ## Examples
@@ -28,6 +29,9 @@ defmodule Want.String do
 
     iex> Want.String.cast(:a, min: 3)
     {:error, "String length below minimum of 3."}
+
+    iex> Want.String.cast("hello%20world", decode: :uri)
+    {:ok, "hello world"}
 
     iex> Want.String.cast(:a, matches: ~r/a/)
     {:ok, "a"}
@@ -48,6 +52,8 @@ defmodule Want.String do
       {:error, "String does not match provided regex."}
     end
   end
+  def cast(value, [{:decode, :uri} | t]) when is_binary(value),
+    do: cast(URI.decode(value), t)
   def cast(value, [_ | t]) when is_binary(value),
     do: cast(value, t)
   def cast(value, []) when is_binary(value),

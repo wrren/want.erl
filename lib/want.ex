@@ -10,6 +10,7 @@ defmodule Want do
 
     * `:max` - Maximum allowable string length.
     * `:min` - Minimum allowable string length.
+    * ':decode' - Currently only supports :uri; runs URI.decode on the input value
     * `:matches` - The resulting string must match the given regex.
     * `:default` - If conversion fails, this value should be returned instead.
 
@@ -23,6 +24,9 @@ defmodule Want do
 
     iex> Want.string(:hello, max: 3)
     {:error, "String length exceeds maximum of 3."}
+
+    iex> Want.string("hello%20world", decode: :uri)
+    {:ok, "hello world"}
 
     iex> Want.string(:a, min: 3)
     {:error, "String length below minimum of 3."}
