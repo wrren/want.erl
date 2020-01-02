@@ -3,12 +3,13 @@ defmodule Want.MixProject do
 
   def project do
     [
-      app:      :want,
-      version:  "1.2.0",
-      elixir:   "~> 1.0",
-      deps:     deps(),
-      description: description(),
-      package: package()
+      app:          :want,
+      version:      "1.2.0",
+      elixir:       "~> 1.0",
+      deps:         deps(),
+      description:  description(),
+      package:      package(),
+      docs:         docs()
     ]
   end
 
@@ -21,6 +22,14 @@ defmodule Want.MixProject do
 
   def description do
     "Type conversion library for Erlang and Elixir."
+  end
+
+  def docs do
+    [
+      main: "MyApp", # The main page in the docs
+      logo: "path/to/logo.png",
+      extras: ["README.md"]
+    ]
   end
 
   def package do
