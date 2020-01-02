@@ -72,6 +72,12 @@ defmodule Want.Keyword do
     iex> Want.Keyword.cast(%{"hello" => "world", "foo" => "bar"}, %{hello: [], foo: [type: :atom]})
     {:ok, [hello: "world", foo: :bar]}
 
+    iex> Want.Keyword.cast(%{"hello" => "world"}, %{hello: [], foo: [required: true]})
+    {:error, "Failed to cast key foo (key :foo not found) and no default value provided."}
+
+    iex> Want.Keyword.cast(%{"hello" => "world"}, %{hello: [], foo: []})
+    {:ok, [hello: "world"]}
+
     iex> Want.Keyword.cast(%{"hello" => %{"foo" => "bar"}}, %{hello: %{foo: [type: :atom]}})
     {:ok, [hello: [foo: :bar]]}
   """
@@ -87,9 +93,13 @@ defmodule Want.Keyword do
         {:ok, value} ->
           {:cont, Keyword.put(out, key, value)}
         {true, reason} ->
-          {:halt, {:error, "Failed to cast key #{key} to map: #{inspect reason}"}}
+          {:halt, {:error, "Failed to cast key #{key} to map: #{reason}"}}
         {false, reason} ->
-          {:halt, {:error, "Failed to cast key #{key} (#{inspect reason}) and no default value provided."}}
+          if opts[:required] do
+            {:halt, {:error, "Failed to cast key #{key} (#{reason}) and no default value provided."}}
+          else
+            {:cont, out}
+          end
       end
     end)
     |> case do
@@ -110,7 +120,7 @@ defmodule Want.Keyword do
     end)
     |> case do
       {_, v}  -> cast(v, type(opts), opts)
-      nil     -> {:error, "Key #{inspect key} not found."}
+      nil     -> {:error, "key #{inspect key} not found"}
     end
   end
   def cast(input, key, opts) when (is_list(input) or is_map(input)) and is_atom(key) and not is_nil(key) do
@@ -122,7 +132,7 @@ defmodule Want.Keyword do
     end)
     |> case do
       {_, v}  -> cast(v, type(opts), opts)
-      nil     -> {:error, "Key #{inspect key} not found."}
+      nil     -> {:error, "key #{inspect key} not found"}
     end
   end
   def cast(input, nil, opts) when is_map(opts),
@@ -138,7 +148,7 @@ defmodule Want.Keyword do
   def cast(input, :sort, opts),
     do: Want.Sort.cast(input, opts)
   def cast(_input, type, _opts),
-    do: {:error, "Unknown cast type #{inspect type} specified"}
+    do: {:error, "unknown cast type #{inspect type} specified"}
 
   #
   # Pull a type specified from a set of options
