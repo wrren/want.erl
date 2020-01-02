@@ -26,9 +26,7 @@ defmodule Want.MixProject do
 
   def docs do
     [
-      main: "MyApp", # The main page in the docs
-      logo: "path/to/logo.png",
-      extras: ["README.md"]
+      main: "Want"
     ]
   end
 
