@@ -216,7 +216,7 @@ defmodule Want do
   Specific conversion and validation options for each type corresponds to those available
   for `Want.integer/2`, `Want.float/2`, `Want.string/2` and `Want.atom/2`.
 
-  Maps can be nested by using
+  Maps can be nested by using a new schema map as a value in a parent schema.
 
   ## Examples
 
@@ -240,6 +240,44 @@ defmodule Want do
     do: Want.Map.cast(input, schema)
   def map!(input, schema) do
     case Want.Map.cast(input, schema) do
+      {:ok, output} ->
+        output
+      {:error, reason} ->
+        raise reason
+    end
+  end
+
+  @doc """
+  Cast an incoming keyword list or map to an output keyword list using the provided schema to control
+  conversion rules and validations. Each value in the schema map represents conversion options.
+
+  Specify a :type field to cast the input value for a given key to that type, defaults to :string.
+  Specific conversion and validation options for each type corresponds to those available
+  for `Want.integer/2`, `Want.float/2`, `Want.string/2` and `Want.atom/2`.
+
+  Keyword lists can be nested by using a new schema map as a value in a parent schema.
+
+  ## Examples
+
+    iex> Want.keywords(%{"id" => 1}, %{id: [type: :integer]})
+    {:ok, [id: 1]}
+
+    iex> Want.keywords(%{}, %{id: [type: :integer, default: 1]})
+    {:ok, [id: 1]}
+
+    iex> Want.keywords(%{"id" => "bananas"}, %{id: [type: :integer, default: 1]})
+    {:ok, [id: 1]}
+
+    iex> Want.keywords(%{"hello" => "world", "foo" => "bar"}, %{hello: [], foo: [type: :atom]})
+    {:ok, [hello: "world", foo: :bar]}
+
+    iex> Want.keywords(%{"hello" => %{"foo" => "bar"}}, %{hello: %{foo: [type: :atom]}})
+    {:ok, [hello: [foo: :bar]]}
+  """
+  def keywords(input, schema),
+    do: Want.Keyword.cast(input, schema)
+  def keywords!(input, schema) do
+    case Want.Keyword.cast(input, schema) do
       {:ok, output} ->
         output
       {:error, reason} ->

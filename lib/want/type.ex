@@ -9,8 +9,11 @@ defmodule Want.Type do
     end
   end
 
+  @type opts    :: Keyword.t()
+  @type schema  :: map()
+
   #
   # Cast an incoming value to a given type
   #
-  @callback cast(input :: any(), opts :: Keyword.t()) :: {:ok, result :: any()} | {:error, reason :: any()}
+  @callback cast(input :: any(), opts() | schema()) :: {:ok, result :: any()} | {:error, reason :: any()}
 end
