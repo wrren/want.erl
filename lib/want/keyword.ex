@@ -78,6 +78,9 @@ defmodule Want.Keyword do
     iex> Want.Keyword.cast(%{"hello" => "world"}, %{hello: [], foo: []})
     {:ok, [hello: "world"]}
 
+    iex> Want.Keyword.cast(%{"hello" => "world"}, %{hello: [type: :enum, valid: [:world]]})
+    {:ok, [hello: :world]}
+
     iex> Want.Keyword.cast(%{"hello" => %{"foo" => "bar"}}, %{hello: %{foo: [type: :atom]}})
     {:ok, [hello: [foo: :bar]]}
   """
@@ -147,6 +150,8 @@ defmodule Want.Keyword do
     do: Want.Atom.cast(input, opts)
   def cast(input, :sort, opts),
     do: Want.Sort.cast(input, opts)
+  def cast(input, :enum, opts),
+    do: Want.Enum.cast(input, opts)
   def cast(_input, type, _opts),
     do: {:error, "unknown cast type #{inspect type} specified"}
 

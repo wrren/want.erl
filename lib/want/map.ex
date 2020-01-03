@@ -77,6 +77,9 @@ defmodule Want.Map do
     iex> Want.Map.cast(%{"hello" => "world"}, %{hello: [], foo: [required: true]})
     {:error, "Failed to cast key foo (key :foo not found) and no default value provided."}
 
+    iex> Want.Map.cast(%{"hello" => "world"}, %{hello: [type: :enum, valid: [:world]]})
+    {:ok, %{hello: :world}}
+
     iex> Want.Map.cast(%{"hello" => "world"}, %{hello: [], foo: []})
     {:ok, %{hello: "world"}}
 
@@ -149,6 +152,8 @@ defmodule Want.Map do
     do: Want.Atom.cast(input, opts)
   def cast(input, :sort, opts),
     do: Want.Sort.cast(input, opts)
+  def cast(input, :enum, opts),
+    do: Want.Enum.cast(input, opts)
   def cast(_input, type, _opts),
     do: {:error, "unknown cast type #{inspect type} specified"}
 
