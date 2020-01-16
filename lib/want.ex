@@ -218,6 +218,12 @@ defmodule Want do
 
   Maps can be nested by using a new schema map as a value in a parent schema.
 
+  ## Options
+
+    * `:merge` - Provide a map matching the given schema that contains default values to be
+      used if the input value does not contain a particular field. Useful when updating a map
+      with new inputs without overwriting all fields.
+
   ## Examples
 
     iex> Want.map(%{"id" => 1}, %{id: [type: :integer]})
@@ -235,11 +241,13 @@ defmodule Want do
     iex> Want.map(%{"hello" => %{"foo" => "bar"}}, %{hello: %{foo: [type: :atom]}})
     {:ok, %{hello: %{foo: :bar}}}
 
+    iex> Want.map(%{"id" => "bananas"}, %{id: [type: :integer, default: 1]}, merge: %{id: 2})
+    {:ok, %{id: 2}}
   """
-  def map(input, schema),
-    do: Want.Map.cast(input, schema)
-  def map!(input, schema) do
-    case Want.Map.cast(input, schema) do
+  def map(input, schema, opts \\ []),
+    do: Want.Map.cast(input, schema, opts)
+  def map!(input, schema, opts \\ []) do
+    case Want.Map.cast(input, schema, opts) do
       {:ok, output} ->
         output
       {:error, reason} ->
@@ -273,11 +281,14 @@ defmodule Want do
 
     iex> Want.keywords(%{"hello" => %{"foo" => "bar"}}, %{hello: %{foo: [type: :atom]}})
     {:ok, [hello: [foo: :bar]]}
+
+    iex> Want.keywords(%{"id" => "bananas"}, %{id: [type: :integer, default: 1]}, merge: [id: 2])
+    {:ok, [id: 2]}
   """
-  def keywords(input, schema),
-    do: Want.Keyword.cast(input, schema)
-  def keywords!(input, schema) do
-    case Want.Keyword.cast(input, schema) do
+  def keywords(input, schema, opts \\ []),
+    do: Want.Keyword.cast(input, schema, opts)
+  def keywords!(input, schema, opts \\ []) do
+    case Want.Keyword.cast(input, schema, opts) do
       {:ok, output} ->
         output
       {:error, reason} ->

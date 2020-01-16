@@ -83,22 +83,28 @@ defmodule Want.Keyword do
 
     iex> Want.Keyword.cast(%{"hello" => %{"foo" => "bar"}}, %{hello: %{foo: [type: :atom]}})
     {:ok, [hello: [foo: :bar]]}
+
+    iex> Want.Keyword.cast(%{"id" => "bananas"}, %{id: [type: :integer, default: 1]}, merge: [id: 2])
+    {:ok, [id: 2]}
   """
   @spec cast(value :: input(), schema :: schema()) :: result()
-  def cast(input, schema) when is_map(schema) and (is_list(input) or is_map(input)) do
+  def cast(input, schema),
+    do: cast(input, schema, [])
+  @spec cast(value :: input(), schema :: schema(), opts :: Keyword.t()) :: result()
+  def cast(input, schema, opts) when is_map(schema) and (is_list(input) or is_map(input)) do
     schema
-    |> Enum.reduce_while([], fn({key, opts}, out) ->
-      with  {:error, reason}   <- cast(input, key, opts),
-            {false, _reason}   <- {is_map(opts), reason},
-            {true, _reason}    <- {Keyword.has_key?(opts, :default), reason} do
-        {:cont, Keyword.put(out, key, opts[:default])}
+    |> Enum.reduce_while([], fn({key, field_opts}, out) ->
+      with  {:error, reason}      <- cast(input, key, field_opts),
+            {false, _reason}      <- {is_map(field_opts), reason},
+            {{:ok, default}, _}   <- {merge_or_default(key, field_opts, opts), reason} do
+        {:cont, Keyword.put(out, key, default)}
       else
         {:ok, value} ->
           {:cont, Keyword.put(out, key, value)}
         {true, reason} ->
           {:halt, {:error, "Failed to cast key #{key} to map: #{reason}"}}
-        {false, reason} ->
-          if opts[:required] do
+        {{:error, :no_default}, reason} ->
+          if field_opts[:required] do
             {:halt, {:error, "Failed to cast key #{key} (#{reason}) and no default value provided."}}
           else
             {:cont, out}
@@ -154,6 +160,21 @@ defmodule Want.Keyword do
     do: Want.Enum.cast(input, opts)
   def cast(_input, type, _opts),
     do: {:error, "unknown cast type #{inspect type} specified"}
+
+  #
+  # Attempt to generate a value for a given key, either using the cast options'
+  # `merge` keywords or a default value from the field options.
+  #
+  defp merge_or_default(key, field_opts, cast_opts) do
+    cond do
+      Keyword.has_key?(Keyword.get(cast_opts, :merge, []), key) ->
+        {:ok, Keyword.get(Keyword.get(cast_opts, :merge, %{}), key)}
+      Keyword.has_key?(field_opts, :default) ->
+        {:ok, field_opts[:default]}
+      true ->
+        {:error, :no_default}
+    end
+  end
 
   #
   # Pull a type specified from a set of options
