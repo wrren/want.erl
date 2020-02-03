@@ -251,7 +251,7 @@ defmodule Want do
       {:ok, output} ->
         output
       {:error, reason} ->
-        raise reason
+        raise ArgumentError, message: reason
     end
   end
 
@@ -292,7 +292,7 @@ defmodule Want do
       {:ok, output} ->
         output
       {:error, reason} ->
-        raise reason
+        raise ArgumentError, message: reason
     end
   end
 
@@ -347,7 +347,7 @@ defmodule Want do
       {:ok, result} ->
         result
       {:error, reason} ->
-        raise reason
+        raise ArgumentError, message: reason
     end
   end
 
@@ -369,7 +369,7 @@ defmodule Want do
       {:ok, result} ->
         result
       {:error, reason} ->
-        raise reason
+        raise ArgumentError, message: reason
     end
   end
 end
