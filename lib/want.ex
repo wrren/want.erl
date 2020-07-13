@@ -158,6 +158,33 @@ defmodule Want do
     do: maybe_default!(Want.Atom.cast(value, opts), opts)
 
   @doc """
+  Cast an incoming value to a datetime.
+
+  ## Examples
+
+    iex> Want.datetime("2020-02-06 18:23:55.850218Z")
+    {:ok, ~U[2020-02-06 18:23:55.850218Z]}
+
+    iex> Want.datetime({{2020, 02, 06}, {18, 23, 55}})
+    {:ok, ~U[2020-02-06 18:23:55Z]}
+
+    iex> Want.datetime({{2020, 02, 06}, {18, 23, 55, 123456}})
+    {:ok, ~U[2020-02-06 18:23:55.123456Z]}
+  """
+  def datetime(value),
+    do: datetime(value, [])
+  def datetime(value, default) when not is_list(default),
+    do: datetime(value, default: default)
+  def datetime(value, opts),
+    do: maybe_default(Want.DateTime.cast(value, opts), opts)
+  def datetime!(value),
+    do: datetime!(value, [])
+  def datetime!(value, default) when not is_list(default),
+    do: datetime!(value, default: default)
+  def datetime!(value, opts),
+    do: maybe_default!(Want.DateTime.cast(value, opts), opts)
+
+  @doc """
   Cast an input to a sort tuple.
 
   ## Options
@@ -206,6 +233,43 @@ defmodule Want do
     do: maybe_default(Want.Enum.cast(input, opts), opts)
   def enum!(input, opts),
     do: maybe_default!(Want.Enum.cast(input, opts), opts)
+
+  @doc """
+  Cast an input into a list. By default this function will simply break up the input into list elements, but
+  further casting and validation of elements can be performed by providing an `element` option. The separator
+  used to split the list defaults to the comma character and this can be controlled using the `separator` option.
+
+  ## Options
+
+    * `:separator` - Determines the character(s) used to separate list items. Defaults to the comma character.
+    * `:element` - Provides the ability to further control how list elements are cast and validated. Similar to the
+    `map` and `keywords` functions, accepts a keyword list with its own `:type` field and validation options.
+    * `:default` - If conversion fails, this value should be returned instead.
+
+  ## Examples
+
+    iex> Want.list("1")
+    {:ok, ["1"]}
+
+    iex> Want.list("1", element: [type: :integer])
+    {:ok, [1]}
+
+    iex> Want.list("1,2,3,4", element: [type: :integer])
+    {:ok, [1, 2, 3, 4]}
+
+    iex> Want.list("1:2:3:4", separator: ":", element: [type: :integer])
+    {:ok, [1, 2, 3, 4]}
+
+    iex> Want.list("hello:world", separator: ":", element: [type: :enum, valid: [:hello, :world]])
+    {:ok, [:hello, :world]}
+
+    iex> Want.list("hello:world", separator: ":", element: [type: :enum, valid: [:hello]])
+    {:ok, [:hello]}
+  """
+  def list(input, opts \\ []),
+    do: maybe_default(Want.List.cast(input, opts), opts)
+  def list!(input, opts \\ []),
+    do: maybe_default!(Want.List.cast(input, opts), opts)
 
   @doc """
   Cast an incoming keyword list or map to an output map using the

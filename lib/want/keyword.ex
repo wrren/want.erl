@@ -158,6 +158,8 @@ defmodule Want.Keyword do
     do: Want.Sort.cast(input, opts)
   def cast(input, :enum, opts),
     do: Want.Enum.cast(input, opts)
+  def cast(input, :datetime, opts),
+    do: Want.DateTime.cast(input, opts)
   def cast(_input, type, _opts),
     do: {:error, "unknown cast type #{inspect type} specified"}
 
