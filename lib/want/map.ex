@@ -102,7 +102,7 @@ defmodule Want.Map do
   def cast(input, schema, opts) when is_map(schema) and (is_list(input) or is_map(input)) do
     schema
     |> Enum.reduce_while(%{}, fn({key, field_opts}, out) ->
-      with  {:error, reason}      <- cast(input, key, field_opts),
+      with  {:error, reason}      <- cast(input, field_opts[:from] || key, field_opts),
             {false, _reason}      <- {is_map(field_opts), reason},
             {{:ok, default}, _}   <- {merge_or_default(key, field_opts, opts), reason} do
         {:cont, Map.put(out, key, default)}

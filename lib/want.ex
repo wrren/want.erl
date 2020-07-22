@@ -280,7 +280,8 @@ defmodule Want do
   Specific conversion and validation options for each type corresponds to those available
   for `Want.integer/2`, `Want.float/2`, `Want.string/2` and `Want.atom/2`.
 
-  Maps can be nested by using a new schema map as a value in a parent schema.
+  Maps can be nested by using a new schema map as a value in a parent schema. The field from which
+  a given value is derived can also be modified using the `:from` option.
 
   ## Options
 
@@ -291,6 +292,9 @@ defmodule Want do
   ## Examples
 
     iex> Want.map(%{"id" => 1}, %{id: [type: :integer]})
+    {:ok, %{id: 1}}
+
+    iex> Want.map(%{"identifier" => 1}, %{id: [type: :integer, from: :identifier]})
     {:ok, %{id: 1}}
 
     iex> Want.map(%{}, %{id: [type: :integer, default: 1]})
@@ -327,17 +331,24 @@ defmodule Want do
   Specific conversion and validation options for each type corresponds to those available
   for `Want.integer/2`, `Want.float/2`, `Want.string/2` and `Want.atom/2`.
 
-  Keyword lists can be nested by using a new schema map as a value in a parent schema.
+  Keyword lists can be nested by using a new schema map as a value in a parent schema. The field from which
+  a given value is derived can also be modified using the `:from` option.
 
   ## Examples
 
     iex> Want.keywords(%{"id" => 1}, %{id: [type: :integer]})
     {:ok, [id: 1]}
 
+    iex> Want.keywords(%{"identifier" => 1}, %{id: [type: :integer, from: :identifier]})
+    {:ok, [id: 1]}
+
     iex> Want.keywords(%{}, %{id: [type: :integer, default: 1]})
     {:ok, [id: 1]}
 
     iex> Want.keywords(%{"id" => "bananas"}, %{id: [type: :integer, default: 1]})
+    {:ok, [id: 1]}
+
+    iex> Want.keywords(%{"identifier" => "bananas"}, %{id: [type: :integer, default: 1, from: :identifier]})
     {:ok, [id: 1]}
 
     iex> Want.keywords(%{"hello" => "world", "foo" => "bar"}, %{hello: [], foo: [type: :atom]})
