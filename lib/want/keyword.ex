@@ -75,6 +75,12 @@ defmodule Want.Keyword do
     iex> Want.Keyword.cast(%{"hello" => "world"}, %{hello: [], foo: [required: true]})
     {:error, "Failed to cast key foo (key :foo not found) and no default value provided."}
 
+    iex> Want.Map.cast(%{"datetime" => DateTime.from_unix!(0)}, %{datetime: [type: :datetime]})
+    {:ok, %{datetime: DateTime.from_unix!(0)}}
+
+    iex> Want.Map.cast(%{"datetime" => "1970-01-01T00:00:00Z"}, %{datetime: [type: :datetime]})
+    {:ok, %{datetime: DateTime.from_unix!(0)}}
+
     iex> Want.Keyword.cast(%{"hello" => "world"}, %{hello: [], foo: []})
     {:ok, [hello: "world"]}
 
@@ -120,7 +126,7 @@ defmodule Want.Keyword do
   end
 
   @spec cast(input :: any(), key :: key(), opts :: opts() | map()) :: {:ok, result :: any()} | {:error, reason :: binary()}
-  def cast(input, key, opts) when (is_list(input) or is_map(input)) and is_binary(key) and not is_nil(key) do
+  def cast(input, key, opts) when (is_list(input) or is_map(input)) and is_binary(key) and not is_nil(key) and not is_struct(input) do
     input
     |> Enum.find(fn
       {k, _v} when is_atom(k)     -> Atom.to_string(k) == key
@@ -132,7 +138,7 @@ defmodule Want.Keyword do
       nil     -> {:error, "key #{inspect key} not found"}
     end
   end
-  def cast(input, key, opts) when (is_list(input) or is_map(input)) and is_atom(key) and not is_nil(key) do
+  def cast(input, key, opts) when (is_list(input) or is_map(input)) and is_atom(key) and not is_nil(key) and not is_struct(input) do
     input
     |> Enum.find(fn
       {k, _v} when is_atom(k)     -> k == key
@@ -160,6 +166,8 @@ defmodule Want.Keyword do
     do: Want.Enum.cast(input, opts)
   def cast(input, :datetime, opts),
     do: Want.DateTime.cast(input, opts)
+  def cast(input, :date, opts),
+    do: Want.Date.cast(input, opts)
   def cast(_input, type, _opts),
     do: {:error, "unknown cast type #{inspect type} specified"}
 

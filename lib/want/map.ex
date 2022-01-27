@@ -80,6 +80,12 @@ defmodule Want.Map do
     iex> Want.Map.cast(%{"hello" => "world", "foo" => "bar"}, %{hello: [], foo: [type: :atom]})
     {:ok, %{hello: "world", foo: :bar}}
 
+    iex> Want.Map.cast(%{"date" => %Date{year: 2022, month: 01, day: 02}}, %{date: [type: :date]})
+    {:ok, %{date: %Date{year: 2022, month: 01, day: 02}}}
+
+    iex> Want.Map.cast(%{"date" => "2022-01-02"}, %{date: [type: :date]})
+    {:ok, %{date: %Date{year: 2022, month: 01, day: 02}}}
+
     iex> Want.Map.cast(%{"hello" => "world"}, %{hello: [], foo: [required: true]})
     {:error, "Failed to cast key foo (key :foo not found) and no default value provided."}
 
@@ -128,7 +134,7 @@ defmodule Want.Map do
   end
 
   @spec cast(input :: any(), key :: key(), opts :: opts() | map()) :: {:ok, result :: any()} | {:error, reason :: binary()}
-  def cast(input, key, opts) when (is_list(input) or is_map(input)) and is_binary(key) and not is_nil(key) do
+  def cast(input, key, opts) when (is_list(input) or is_map(input)) and is_binary(key) and not is_nil(key) and not is_struct(input) do
     input
     |> Enum.find(fn
       {k, _v} when is_atom(k)     -> Atom.to_string(k) == key
@@ -140,7 +146,7 @@ defmodule Want.Map do
       nil     -> {:error, "key #{inspect key} not found"}
     end
   end
-  def cast(input, key, opts) when (is_list(input) or is_map(input)) and is_atom(key) and not is_nil(key) do
+  def cast(input, key, opts) when (is_list(input) or is_map(input)) and is_atom(key) and not is_nil(key) and not is_struct(input) do
     input
     |> Enum.find(fn
       {k, _v} when is_atom(k)     -> k == key
@@ -152,8 +158,6 @@ defmodule Want.Map do
       nil     -> {:error, "key #{inspect key} not found"}
     end
   end
-  def cast(input, nil, opts) when is_map(opts),
-    do: cast(input, opts)
   def cast(input, :integer, opts),
     do: Want.Integer.cast(input, opts)
   def cast(input, :string, opts),
@@ -168,6 +172,10 @@ defmodule Want.Map do
     do: Want.Enum.cast(input, opts)
   def cast(input, :datetime, opts),
     do: Want.DateTime.cast(input, opts)
+  def cast(input, :date, opts),
+    do: Want.Date.cast(input, opts)
+  def cast(input, nil, opts) when is_map(opts),
+    do: cast(input, opts)
   def cast(_input, type, _opts),
     do: {:error, "unknown cast type #{inspect type} specified"}
 

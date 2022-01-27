@@ -4,8 +4,8 @@ defmodule Want.MixProject do
   def project do
     [
       app:          :want,
-      version:      "1.7.0",
-      elixir:       "~> 1.0",
+      version:      "1.8.1",
+      elixir:       "~> 1.10",
       deps:         deps(),
       description:  description(),
       package:      package(),
@@ -15,8 +15,8 @@ defmodule Want.MixProject do
 
   def deps do
     [
-      {:dialyxir, "~> 0.4", only: [:dev]},
-      {:ex_doc, ">= 0.0.0", only: :dev, runtime: false}
+      {:dialyxir, "~> 1.1", only: :dev},
+      {:ex_doc, "~> 0.28.0", only: :dev, runtime: false}
     ]
   end
 
