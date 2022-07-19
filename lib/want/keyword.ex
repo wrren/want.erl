@@ -92,6 +92,9 @@ defmodule Want.Keyword do
 
     iex> Want.Keyword.cast(%{"id" => "bananas"}, %{id: [type: :integer, default: 1]}, merge: [id: 2])
     {:ok, [id: 2]}
+
+    iex> Want.Keyword.cast(%{"id" => "bananas"}, %{id: [type: :any]})
+    {:ok, [id: "bananas"]}
   """
   @spec cast(value :: input(), schema :: schema()) :: result()
   def cast(input, schema),
@@ -168,6 +171,8 @@ defmodule Want.Keyword do
     do: Want.DateTime.cast(input, opts)
   def cast(input, :date, opts),
     do: Want.Date.cast(input, opts)
+  def cast(input, :any, _opts),
+    do: {:ok, input}
   def cast(_input, type, _opts),
     do: {:error, "unknown cast type #{inspect type} specified"}
 
