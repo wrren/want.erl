@@ -63,6 +63,15 @@ defmodule Want.Keyword do
     iex> Want.Keyword.cast(%{"id" => 1}, %{id: [type: :integer]})
     {:ok, [id: 1]}
 
+    iex> Want.Keyword.cast(%{"archived" => "true"}, %{archived: [type: :boolean, default: false]})
+    {:ok, [archived: true]}
+
+    iex> Want.Keyword.cast(%{"archived" => "false"}, %{archived: [type: :boolean, default: false]})
+    {:ok, [archived: false]}
+
+    iex> Want.Keyword.cast(%{}, %{archived: [type: :boolean, default: false]})
+    {:ok, [archived: false]}
+
     iex> Want.Keyword.cast(%{}, %{id: [type: :integer, default: 1]})
     {:ok, [id: 1]}
 
@@ -155,6 +164,8 @@ defmodule Want.Keyword do
   end
   def cast(input, nil, opts) when is_map(opts),
     do: cast(input, opts)
+  def cast(input, :boolean, opts),
+    do: Want.Enum.cast(input, Keyword.merge(opts, valid: [true, false]))
   def cast(input, :integer, opts),
     do: Want.Integer.cast(input, opts)
   def cast(input, :string, opts),

@@ -77,6 +77,15 @@ defmodule Want.Map do
     iex> Want.Map.cast(%{"id" => "bananas"}, %{id: [type: :integer, default: 1]})
     {:ok, %{id: 1}}
 
+    iex> Want.Map.cast(%{"archived" => "true"}, %{archived: [type: :boolean, default: false]})
+    {:ok, %{archived: true}}
+
+    iex> Want.Map.cast(%{"archived" => "false"}, %{archived: [type: :boolean, default: false]})
+    {:ok, %{archived: false}}
+
+    iex> Want.Map.cast(%{}, %{archived: [type: :boolean, default: false]})
+    {:ok, %{archived: false}}
+
     iex> Want.Map.cast(%{"hello" => "world", "foo" => "bar"}, %{hello: [], foo: [type: :atom]})
     {:ok, %{hello: "world", foo: :bar}}
 
@@ -161,6 +170,8 @@ defmodule Want.Map do
       nil     -> {:error, "key #{inspect key} not found"}
     end
   end
+  def cast(input, :boolean, opts),
+    do: Want.Enum.cast(input, Keyword.merge(opts, valid: [true, false]))
   def cast(input, :integer, opts),
     do: Want.Integer.cast(input, opts)
   def cast(input, :string, opts),
