@@ -2,6 +2,7 @@ defmodule Want do
   @moduledoc """
   Type conversion library for Elixir and Erlang.
   """
+  @type enumerable  :: map() | keyword()
 
   @doc """
   Convert a value to a string.

@@ -2,7 +2,9 @@ defmodule Want.DateTime do
   @moduledoc """
   Provides conversions to and from Elixir DateTime structs.
   """
-  @type result      :: {:ok, %DateTime{}} | {:error, binary()}
+  @type t() :: DateTime.t()
+
+  @type result      :: {:ok, t()} | {:error, binary()} | {:error, atom()} | {:gap, t(), t()} | {:ambiguous, t(), t()}
 
   @spec cast(input :: any(), opts :: Keyword.t()) :: result()
   def cast(input, opts) when is_binary(input) and is_list(opts) do
@@ -34,6 +36,7 @@ defmodule Want.DateTime do
     @doc """
     Dump a datetime value to a string
     """
+    @spec dump(DateTime.t(), keyword()) :: {:ok, String.t()}
     def dump(datetime, _opts),
       do: {:ok, DateTime.to_string(datetime)}
   end

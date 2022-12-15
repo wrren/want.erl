@@ -3,17 +3,19 @@ defmodule Want.Keyword do
   Manages conversions to and from keyword lists.
   """
 
-  @type input   :: Keyword.t() | map()
-  @type schema  :: map()
-  @type key     :: binary() | atom()
-  @type opts    :: Keyword.t()
-  @type result  :: {:ok, result :: Keyword.t()} | {:error, reason :: binary()}
+  @type input       :: Want.enumerable()
+  @type schema      :: map()
+  @type key         :: binary() | atom()
+  @type opts        :: Keyword.t()
+  @type result      :: {:ok, result :: Keyword.t()} | {:error, reason :: binary()}
+  @type enumerable  :: Want.enumerable()
 
   defimpl Want.Dump, for: List do
     @doc """
     Dump a keyword list value to a keyword list. All values inside the keyword list will
     be dumped using the associated `Want` module `dump/1` clauses.
     """
+    @spec dump(Want.enumerable(), keyword()) :: {:ok, keyword()} | {:error, term()}
     def dump(input, _opts) do
       input
       |> Enum.reduce_while([], fn({k, v}, out) ->
@@ -25,10 +27,10 @@ defmodule Want.Keyword do
         end
       end)
       |> case do
-        {:error, reason} ->
-          {:error, reason}
-        kv ->
+        kv when is_list(kv) ->
           {:ok, Enum.reverse(kv)}
+        error ->
+          {:error, error}
       end
     end
   end
@@ -39,6 +41,7 @@ defmodule Want.Keyword do
     keys in the old value will be updated using the `Want.Update` protocol. Any
     keys in :new that do not exist in :old will be added.
     """
+    @spec update(keyword(), Want.enumerable()) :: {:ok, keyword()}
     def update(old, new) when is_map(new) or is_list(new) do
       {:ok, new
       |> Enum.reduce(old, fn({key, value}, out) ->
@@ -138,7 +141,7 @@ defmodule Want.Keyword do
   end
 
   @spec cast(input :: any(), key :: key(), opts :: opts() | map()) :: {:ok, result :: any()} | {:error, reason :: binary()}
-  def cast(input, key, opts) when (is_list(input) or is_map(input)) and is_binary(key) and not is_nil(key) and not is_struct(input) do
+  def cast(input, key, opts) when (is_list(input) or (is_map(input) and not is_struct(input))) and is_binary(key) and not is_nil(key) do
     input
     |> Enum.find(fn
       {k, _v} when is_atom(k)     -> Atom.to_string(k) == key
@@ -150,7 +153,7 @@ defmodule Want.Keyword do
       nil     -> {:error, "key #{inspect key} not found"}
     end
   end
-  def cast(input, key, opts) when (is_list(input) or is_map(input)) and is_atom(key) and not is_nil(key) and not is_struct(input) do
+  def cast(input, key, opts) when (is_list(input) or (is_map(input) and not is_struct(input))) and not is_nil(key) and is_atom(key) do
     input
     |> Enum.find(fn
       {k, _v} when is_atom(k)     -> k == key

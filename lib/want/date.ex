@@ -2,7 +2,7 @@ defmodule Want.Date do
   @moduledoc """
   Provides conversions to and from Elixir Date structs.
   """
-  @type result      :: {:ok, %Date{}} | {:error, binary()}
+  @type result      :: {:ok, %Date{}} | {:error, binary()} | {:error, atom()}
 
   @doc """
   Cast a value to an date.
@@ -46,6 +46,7 @@ defmodule Want.Date do
     @doc """
     Dump a date value to a string
     """
+    @spec dump(Date.t(), keyword()) :: {:ok, String.t()}
     def dump(date, _opts),
       do: {:ok, Date.to_string(date)}
   end
