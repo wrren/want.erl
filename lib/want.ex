@@ -5,6 +5,43 @@ defmodule Want do
   @type enumerable  :: map() | keyword()
 
   @doc """
+  Return a list of atoms describing the types that `Want` recognizes.
+  """
+  def valid_types do
+    [
+      :any,
+      :atom,
+      :boolean,
+      :date,
+      :datetime,
+      :enum,
+      :float,
+      :integer,
+      :sort,
+      :string,
+      :map,
+      :keywords
+    ]
+  end
+
+  @doc """
+  Determine whether the given type name is valid.
+  """
+  def is_valid_type?(type),
+    do: Enum.member?(valid_types(), type)
+
+  @doc """
+  Check whether the given type name is valid and raise if not.
+  """
+  def check_type!(type) do
+    if is_valid_type?(type) do
+      true
+    else
+      raise "Invalid type specified: #{inspect(type)}"
+    end
+  end
+
+  @doc """
   Convert a value to a string.
 
   ## Options

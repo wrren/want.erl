@@ -41,3 +41,27 @@ Complex type conversions in Elixir.
 {:ok, %{hello: "world", foo: :bar}}     = Want.map(%{"hello" => "world", "foo" => "bar"}, %{hello: [], foo: [type: :atom]}) 
 
 ```
+
+## Shape Definitions
+
+It can be useful to define the shape of your data, similar to how `Ecto.Schema` works; simultaneously defining a struct and
+the means to parse it from incoming data. You can use `Want.Shape` to do this.
+
+```elixir
+defmodule MyModule do
+    use Want.Shape
+
+    shape do
+        field :is_valid,    :boolean, default: false
+        field :count,       :integer, default: 0
+        field :from,        :string, from: "FromField"
+    end
+end
+
+{:ok, %MyModule{is_valid: true, count: 10, from: "Foo"}} = MyModule.cast(%{
+    "is_valid"  => "true",
+    "count"     => "10",
+    "from"      => "Foo"
+})
+
+```
