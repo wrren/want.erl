@@ -117,6 +117,9 @@ defmodule Want.Map do
 
     iex> Want.Map.cast(%{"id" => "bananas"}, %{id: [type: :any]})
     {:ok, %{id: "bananas"}}
+
+    iex> Want.Map.cast(%{"a" => %{"b" => %{"c" => 100}}}, %{id: [type: :integer, from: {"a", "b", "c"}]})
+    {:ok, %{id: 100}}
   """
   @spec cast(value :: input(), schema :: schema()) :: result()
   def cast(input, schema),
@@ -150,13 +153,33 @@ defmodule Want.Map do
     end
   end
 
-  @spec cast(input :: any(), key :: key() | list(key()), opts :: opts() | map()) :: {:ok, result :: any()} | {:error, reason :: binary()}
+  @spec cast(input :: any(), key :: key() | list(key()) | tuple(), opts :: opts() | map()) :: {:ok, result :: any()} | {:error, reason :: binary()}
   def cast(_input, [], _opts),
     do: {:error, "key not found"}
   def cast(input, [key | t], opts) do
     case cast(input, key, opts) do
       {:ok, v}    -> {:ok, v}
       {:error, _} -> cast(input, t, opts)
+    end
+  end
+  def cast(input, key, opts) when is_tuple(key) do
+    key
+    |> :erlang.tuple_to_list()
+    |> Enum.reduce_while({input, :error}, fn(key, {input, _out}) ->
+      input
+      |> Enum.find(fn
+        {k, _v} when is_atom(k)     -> Atom.to_string(k) == key
+        {k, _v} when is_binary(k)   -> k == key
+        _                           -> false
+      end)
+      |> case do
+        {_, v}  -> {:cont, {v, :ok}}
+        nil     -> {:halt, {input, :error}}
+      end
+    end)
+    |> case do
+      {v, :ok}      -> cast(v, type(opts), opts)
+      {_v, :error}  -> {:error, :key_not_found}
     end
   end
   def cast(input, key, opts) when (is_list(input) or (is_map(input) and not is_struct(input))) and is_binary(key) and not is_nil(key) do

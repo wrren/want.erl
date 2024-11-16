@@ -40,6 +40,8 @@ Complex type conversions in Elixir.
 {:ok, [id: 1]}                          = Want.keywords(%{"id" => "bananas"}, %{id: [type: :integer, default: 1]})
 {:ok, %{hello: "world", foo: :bar}}     = Want.map(%{"hello" => "world", "foo" => "bar"}, %{hello: [], foo: [type: :atom]}) 
 
+# Nest Key Extraction
+{:ok, %{id: 100}}                       = Want.Map.cast(%{"a" => %{"b" => %{"c" => 100}}}, %{id: [type: :integer, from: {"a", "b", "c"}]})
 ```
 
 ## Shape Definitions
