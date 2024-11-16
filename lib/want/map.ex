@@ -165,17 +165,29 @@ defmodule Want.Map do
   def cast(input, key, opts) when is_tuple(key) do
     key
     |> :erlang.tuple_to_list()
-    |> Enum.reduce_while({input, :error}, fn(key, {input, _out}) ->
-      input
-      |> Enum.find(fn
-        {k, _v} when is_atom(k)     -> Atom.to_string(k) == key
-        {k, _v} when is_binary(k)   -> k == key
-        _                           -> false
-      end)
-      |> case do
-        {_, v}  -> {:cont, {v, :ok}}
-        nil     -> {:halt, {input, :error}}
-      end
+    |> Enum.reduce_while({input, :error}, fn
+      (key, {input, _out}) when is_binary(key) ->
+        input
+        |> Enum.find(fn
+          {k, _v} when is_atom(k)     -> Atom.to_string(k) == key
+          {k, _v} when is_binary(k)   -> k == key
+          _                           -> false
+        end)
+        |> case do
+          {_, v}  -> {:cont, {v, :ok}}
+          nil     -> {:halt, {input, :error}}
+        end
+      (key, {input, _out}) when is_atom(key) ->
+        input
+        |> Enum.find(fn
+          {k, _v} when is_atom(k)     -> k == key
+          {k, _v} when is_binary(k)   -> k == Atom.to_string(key)
+          _                           -> false
+        end)
+        |> case do
+          {_, v}  -> {:cont, {v, :ok}}
+          nil     -> {:halt, {input, :error}}
+        end
     end)
     |> case do
       {v, :ok}      -> cast(v, type(opts), opts)

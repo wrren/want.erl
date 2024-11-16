@@ -4,7 +4,7 @@ defmodule Want.MixProject do
   def project do
     [
       app:          :want,
-      version:      "1.13.0",
+      version:      "1.13.1",
       elixir:       "~> 1.10",
       deps:         deps(),
       description:  description(),
