@@ -55,6 +55,13 @@ defmodule Want.Enum do
       {:error, _}   -> cast(value, opts, t)
     end
   end
+  def cast(value, opts, [v | t]) when is_atom(v) and is_binary(value) do
+    if String.downcase(Atom.to_string(v)) == String.downcase(value) do
+      {:ok, v}
+    else
+      cast(value, opts, t)
+    end
+  end
   def cast(value, opts, [v | t] = valid) when is_atom(v) do
     case Want.Atom.cast(value, exists: true) do
       {:ok, value}  -> cast(value, opts, valid)

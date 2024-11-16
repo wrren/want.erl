@@ -6,17 +6,20 @@ defmodule Want.ShapeTest do
     field :is_valid,    :boolean, default: false
     field :is_integer,  :integer, default: 100
     field :from,        :string, from: "WierdField", default: "Hello, World!"
+    field :hello,       :enum, valid: [:default, :world], default: :default
   end
 
   describe "cast/1" do
     test "successfully casts a valid map with present fields" do
       assert Want.ShapeTest.cast!(%{
-        "is_valid" => "true",
-        "is_integer" => "1"
+        "is_valid"    => "true",
+        "is_integer"  => "1",
+        "hello"       => "World"
       }) == %Want.ShapeTest{
         is_valid: true,
         is_integer: 1,
-        from: "Hello, World!"
+        from: "Hello, World!",
+        hello: :world
       }
     end
 
@@ -26,7 +29,8 @@ defmodule Want.ShapeTest do
       }) == %Want.ShapeTest{
         is_valid: false,
         is_integer: 1,
-        from: "Hello, World!"
+        from: "Hello, World!",
+        hello: :default
       }
 
       assert Want.ShapeTest.cast!(%{
@@ -34,7 +38,8 @@ defmodule Want.ShapeTest do
       }) == %Want.ShapeTest{
         is_valid: true,
         is_integer: 100,
-        from: "Hello, World!"
+        from: "Hello, World!",
+        hello: :default
       }
     end
 
@@ -45,7 +50,8 @@ defmodule Want.ShapeTest do
       }) == %Want.ShapeTest{
         is_valid: false,
         is_integer: 1,
-        from: "Bar"
+        from: "Bar",
+        hello: :default
       }
     end
   end

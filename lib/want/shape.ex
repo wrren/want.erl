@@ -27,7 +27,7 @@ defmodule Want.Shape do
   end
 
   @doc """
-  Define a field within a `Want` schema.
+  Define a field within a shape.
   """
   defmacro field(name, type \\ :string, opts \\ []) do
     quote do

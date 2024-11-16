@@ -100,6 +100,9 @@ defmodule Want.Map do
     iex> Want.Map.cast(%{"hello" => "world"}, %{hello: [], foo: [required: true]})
     {:error, "Failed to cast key foo (key :foo not found) and no default value provided."}
 
+    iex> Want.Map.cast(%{"c" => "world"}, %{foo: [type: :string, from: ["a", "b", "c"]]})
+    {:ok, %{foo: "world"}}
+
     iex> Want.Map.cast(%{"hello" => "world"}, %{hello: [type: :enum, valid: [:world]]})
     {:ok, %{hello: :world}}
 
@@ -147,7 +150,15 @@ defmodule Want.Map do
     end
   end
 
-  @spec cast(input :: any(), key :: key(), opts :: opts() | map()) :: {:ok, result :: any()} | {:error, reason :: binary()}
+  @spec cast(input :: any(), key :: key() | list(key()), opts :: opts() | map()) :: {:ok, result :: any()} | {:error, reason :: binary()}
+  def cast(_input, [], _opts),
+    do: {:error, "key not found"}
+  def cast(input, [key | t], opts) do
+    case cast(input, key, opts) do
+      {:ok, v}    -> {:ok, v}
+      {:error, _} -> cast(input, t, opts)
+    end
+  end
   def cast(input, key, opts) when (is_list(input) or (is_map(input) and not is_struct(input))) and is_binary(key) and not is_nil(key) do
     input
     |> Enum.find(fn
