@@ -1,12 +1,23 @@
-# want
+# Want [![Hex Version](https://img.shields.io/hexpm/v/want.svg)](https://hex.pm/packages/want) [![Hex Docs](https://img.shields.io/badge/docs-hexpm-blue.svg)](https://hexdocs.pm/want/)
 
 Erlang and Elixir library for performing easy type conversions. The Elixir interface
 is now a lot more complex than the Erlang one; supporting schema-based conversions between
 container types along with validation and default values.
 
-# Example Usage
+## Installation
 
-Basic conversion between types in Erlang.
+The package can be installed by adding `want` to your list of dependencies
+in `mix.exs`:
+
+```elixir
+def deps do
+  [{:want, "~> 1.13"}]
+end
+```
+
+## Basic Usage
+
+Conversion between types in Erlang.
 
 ```erlang
 
@@ -18,7 +29,7 @@ true		= want:boolean( "true" ),
 	
 ```
 
-Basic conversion between types in Elixir.
+Conversion between types in Elixir.
 
 ```elixir
 

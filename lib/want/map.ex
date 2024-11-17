@@ -219,7 +219,7 @@ defmodule Want.Map do
     end
   end
   def cast(input, :boolean, opts),
-    do: Want.Enum.cast(input, Keyword.merge(opts, valid: [true, false]))
+    do: Want.Boolean.cast(input, opts)
   def cast(input, :integer, opts),
     do: Want.Integer.cast(input, opts)
   def cast(input, :string, opts),

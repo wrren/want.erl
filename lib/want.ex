@@ -1,6 +1,8 @@
 defmodule Want do
   @moduledoc """
-  Type conversion library for Elixir and Erlang.
+  Type conversion library for Elixir and Erlang. Want allows you to convert between Elixir and Erlang types using an intuitive interface. In
+  addition, Elixir users have access to more complex type conversion via the `Want.map/3`, `Want.keywords/3` and `Want.Shape` functions and
+  macros.
   """
   @type enumerable  :: map() | keyword()
 
@@ -156,6 +158,43 @@ defmodule Want do
     do: float!(value, default: default)
   def float!(value, opts),
     do: maybe_default!(Want.Float.cast(value, opts), opts)
+
+  @doc """
+  Cast a value to a boolean.
+
+  ## Options
+
+    * `:default` - If conversion fails, this value should be returned instead.
+
+  ## Examples
+
+    iex> Want.boolean("true")
+    {:ok, true}
+
+    iex> Want.boolean("FALSE")
+    {:ok, false}
+
+    iex> Want.boolean(1.0)
+    {:ok, true}
+
+    iex> Want.boolean({:a, :b})
+    {:error, "Failed to convert value {:a, :b} to boolean."}
+
+    iex> Want.boolean({:a, :b}, default: true)
+    {:ok, true}
+  """
+  def boolean(value),
+    do: boolean(value, [])
+  def boolean(value, default) when is_boolean(default),
+    do: boolean(value, default: default)
+  def boolean(value, opts),
+    do: maybe_default(Want.Boolean.cast(value, opts), opts)
+  def boolean!(value),
+    do: boolean!(value, [])
+  def boolean!(value, default) when is_boolean(default),
+    do: boolean!(value, default: default)
+  def boolean!(value, opts),
+    do: maybe_default!(Want.Boolean.cast(value, opts), opts)
 
   @doc """
   Cast a value to an atom.
