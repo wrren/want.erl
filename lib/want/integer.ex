@@ -16,23 +16,23 @@ defmodule Want.Integer do
 
   ## Examples
 
-    iex> Want.Integer.cast("1")
-    {:ok, 1}
+      iex> Want.Integer.cast("1")
+      {:ok, 1}
 
-    iex> Want.Integer.cast(1.0)
-    {:ok, 1}
+      iex> Want.Integer.cast(1.0)
+      {:ok, 1}
 
-    iex> Want.Integer.cast(:'1')
-    {:ok, 1}
+      iex> Want.Integer.cast(:'1')
+      {:ok, 1}
 
-    iex> Want.Integer.cast({:a, :b})
-    {:error, "Failed to convert value {:a, :b} to integer."}
+      iex> Want.Integer.cast({:a, :b})
+      {:error, "Failed to convert value {:a, :b} to integer."}
 
-    iex> Want.Integer.cast("10", max: 3)
-    {:error, "Integer value exceeds maximum 3."}
+      iex> Want.Integer.cast("10", max: 3)
+      {:error, "Integer value exceeds maximum 3."}
 
-    iex> Want.Integer.cast(1.0, min: 3)
-    {:error, "Integer value below minimum 3."}
+      iex> Want.Integer.cast(1.0, min: 3)
+      {:error, "Integer value below minimum 3."}
   """
   @spec cast(value :: any(), opts :: Keyword.t()) :: result()
   def cast(value),

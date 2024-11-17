@@ -11,23 +11,23 @@ defmodule Want.Boolean do
 
   ## Examples
 
-    iex> Want.Boolean.cast("true")
-    {:ok, true}
+      iex> Want.Boolean.cast("true")
+      {:ok, true}
 
-    iex> Want.Boolean.cast("false")
-    {:ok, false}
+      iex> Want.Boolean.cast("false")
+      {:ok, false}
 
-    iex> Want.Boolean.cast("TRUE")
-    {:ok, true}
+      iex> Want.Boolean.cast("TRUE")
+      {:ok, true}
 
-    iex> Want.Boolean.cast(1.0)
-    {:ok, true}
+      iex> Want.Boolean.cast(1.0)
+      {:ok, true}
 
-    iex> Want.Boolean.cast(0)
-    {:ok, false}
+      iex> Want.Boolean.cast(0)
+      {:ok, false}
 
-    iex> Want.Boolean.cast({:a, :b})
-    {:error, "Failed to convert value {:a, :b} to boolean."}
+      iex> Want.Boolean.cast({:a, :b})
+      {:error, "Failed to convert value {:a, :b} to boolean."}
   """
   @spec cast(value :: any()) :: result()
   def cast(value),

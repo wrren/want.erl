@@ -22,23 +22,23 @@ defmodule Want.List do
 
   ## Examples
 
-    iex> Want.List.cast("1")
-    {:ok, ["1"]}
+      iex> Want.List.cast("1")
+      {:ok, ["1"]}
 
-    iex> Want.List.cast("1", element: [type: :integer])
-    {:ok, [1]}
+      iex> Want.List.cast("1", element: [type: :integer])
+      {:ok, [1]}
 
-    iex> Want.List.cast("1,2,3,4", element: [type: :integer])
-    {:ok, [1, 2, 3, 4]}
+      iex> Want.List.cast("1,2,3,4", element: [type: :integer])
+      {:ok, [1, 2, 3, 4]}
 
-    iex> Want.List.cast("1:2:3:4", separator: ":", element: [type: :integer])
-    {:ok, [1, 2, 3, 4]}
+      iex> Want.List.cast("1:2:3:4", separator: ":", element: [type: :integer])
+      {:ok, [1, 2, 3, 4]}
 
-    iex> Want.List.cast("hello:world", separator: ":", element: [type: :enum, valid: [:hello, :world]])
-    {:ok, [:hello, :world]}
+      iex> Want.List.cast("hello:world", separator: ":", element: [type: :enum, valid: [:hello, :world]])
+      {:ok, [:hello, :world]}
 
-    iex> Want.List.cast("hello:world", separator: ":", element: [type: :enum, valid: [:hello]])
-    {:ok, [:hello]}
+      iex> Want.List.cast("hello:world", separator: ":", element: [type: :enum, valid: [:hello]])
+      {:ok, [:hello]}
   """
   @spec cast(value :: any(), opts :: Keyword.t()) :: result()
   def cast(value),

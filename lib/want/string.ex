@@ -18,23 +18,23 @@ defmodule Want.String do
 
   ## Examples
 
-    iex> Want.String.cast(1)
-    {:ok, "1"}
+      iex> Want.String.cast(1)
+      {:ok, "1"}
 
-    iex> Want.String.cast({:a, :b})
-    {:error, "Failed to convert value {:a, :b} to string."}
+      iex> Want.String.cast({:a, :b})
+      {:error, "Failed to convert value {:a, :b} to string."}
 
-    iex> Want.String.cast(:hello, max: 3)
-    {:error, "String length exceeds maximum of 3."}
+      iex> Want.String.cast(:hello, max: 3)
+      {:error, "String length exceeds maximum of 3."}
 
-    iex> Want.String.cast(:a, min: 3)
-    {:error, "String length below minimum of 3."}
+      iex> Want.String.cast(:a, min: 3)
+      {:error, "String length below minimum of 3."}
 
-    iex> Want.String.cast("hello%20world", decode: :uri)
-    {:ok, "hello world"}
+      iex> Want.String.cast("hello%20world", decode: :uri)
+      {:ok, "hello world"}
 
-    iex> Want.String.cast(:a, matches: ~r/a/)
-    {:ok, "a"}
+      iex> Want.String.cast(:a, matches: ~r/a/)
+      {:ok, "a"}
   """
   @spec cast(value :: any()) :: result()
   def cast(value),

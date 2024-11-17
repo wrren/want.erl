@@ -16,23 +16,23 @@ defmodule Want.Float do
 
   ## Examples
 
-    iex> Want.Float.cast("1")
-    {:ok, 1.0}
+      iex> Want.Float.cast("1")
+      {:ok, 1.0}
 
-    iex> Want.Float.cast(1.0)
-    {:ok, 1.0}
+      iex> Want.Float.cast(1.0)
+      {:ok, 1.0}
 
-    iex> Want.Float.cast(:'1')
-    {:ok, 1.0}
+      iex> Want.Float.cast(:'1')
+      {:ok, 1.0}
 
-    iex> Want.Float.cast({:a, :b})
-    {:error, "Failed to convert value {:a, :b} to float."}
+      iex> Want.Float.cast({:a, :b})
+      {:error, "Failed to convert value {:a, :b} to float."}
 
-    iex> Want.Float.cast("10", max: 3.0)
-    {:error, "Float value exceeds maximum 3.0."}
+      iex> Want.Float.cast("10", max: 3.0)
+      {:error, "Float value exceeds maximum 3.0."}
 
-    iex> Want.Float.cast(1.0, min: 3.0)
-    {:error, "Float value below minimum 3.0."}
+      iex> Want.Float.cast(1.0, min: 3.0)
+      {:error, "Float value below minimum 3.0."}
   """
   @spec cast(value :: any()) :: result()
   def cast(value),

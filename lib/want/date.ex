@@ -13,8 +13,8 @@ defmodule Want.Date do
 
   ## Examples
 
-    iex> Want.Date.cast("2022-03-04")
-    {:ok, %Date{year: 2022, month: 03, day: 04}}
+      iex> Want.Date.cast("2022-03-04")
+      {:ok, %Date{year: 2022, month: 03, day: 04}}
   """
   @spec cast(value :: any()) :: result()
   def cast(value),

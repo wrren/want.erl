@@ -70,56 +70,56 @@ defmodule Want.Map do
 
   ## Examples
 
-    iex> Want.Map.cast(%{"id" => 1}, %{id: [type: :integer]})
-    {:ok, %{id: 1}}
+      iex> Want.Map.cast(%{"id" => 1}, %{id: [type: :integer]})
+      {:ok, %{id: 1}}
 
-    iex> Want.Map.cast(%{}, %{id: [type: :integer, default: 1]})
-    {:ok, %{id: 1}}
+      iex> Want.Map.cast(%{}, %{id: [type: :integer, default: 1]})
+      {:ok, %{id: 1}}
 
-    iex> Want.Map.cast(%{"id" => "bananas"}, %{id: [type: :integer, default: 1]})
-    {:ok, %{id: 1}}
+      iex> Want.Map.cast(%{"id" => "bananas"}, %{id: [type: :integer, default: 1]})
+      {:ok, %{id: 1}}
 
-    iex> Want.Map.cast(%{"archived" => "true"}, %{archived: [type: :boolean, default: false]})
-    {:ok, %{archived: true}}
+      iex> Want.Map.cast(%{"archived" => "true"}, %{archived: [type: :boolean, default: false]})
+      {:ok, %{archived: true}}
 
-    iex> Want.Map.cast(%{"archived" => "false"}, %{archived: [type: :boolean, default: false]})
-    {:ok, %{archived: false}}
+      iex> Want.Map.cast(%{"archived" => "false"}, %{archived: [type: :boolean, default: false]})
+      {:ok, %{archived: false}}
 
-    iex> Want.Map.cast(%{}, %{archived: [type: :boolean, default: false]})
-    {:ok, %{archived: false}}
+      iex> Want.Map.cast(%{}, %{archived: [type: :boolean, default: false]})
+      {:ok, %{archived: false}}
 
-    iex> Want.Map.cast(%{"hello" => "world", "foo" => "bar"}, %{hello: [], foo: [type: :atom]})
-    {:ok, %{hello: "world", foo: :bar}}
+      iex> Want.Map.cast(%{"hello" => "world", "foo" => "bar"}, %{hello: [], foo: [type: :atom]})
+      {:ok, %{hello: "world", foo: :bar}}
 
-    iex> Want.Map.cast(%{"date" => %Date{year: 2022, month: 01, day: 02}}, %{date: [type: :date]})
-    {:ok, %{date: %Date{year: 2022, month: 01, day: 02}}}
+      iex> Want.Map.cast(%{"date" => %Date{year: 2022, month: 01, day: 02}}, %{date: [type: :date]})
+      {:ok, %{date: %Date{year: 2022, month: 01, day: 02}}}
 
-    iex> Want.Map.cast(%{"date" => "2022-01-02"}, %{date: [type: :date]})
-    {:ok, %{date: %Date{year: 2022, month: 01, day: 02}}}
+      iex> Want.Map.cast(%{"date" => "2022-01-02"}, %{date: [type: :date]})
+      {:ok, %{date: %Date{year: 2022, month: 01, day: 02}}}
 
-    iex> Want.Map.cast(%{"hello" => "world"}, %{hello: [], foo: [required: true]})
-    {:error, "Failed to cast key foo (key :foo not found) and no default value provided."}
+      iex> Want.Map.cast(%{"hello" => "world"}, %{hello: [], foo: [required: true]})
+      {:error, "Failed to cast key foo (key :foo not found) and no default value provided."}
 
-    iex> Want.Map.cast(%{"c" => "world"}, %{foo: [type: :string, from: ["a", "b", "c"]]})
-    {:ok, %{foo: "world"}}
+      iex> Want.Map.cast(%{"c" => "world"}, %{foo: [type: :string, from: ["a", "b", "c"]]})
+      {:ok, %{foo: "world"}}
 
-    iex> Want.Map.cast(%{"hello" => "world"}, %{hello: [type: :enum, valid: [:world]]})
-    {:ok, %{hello: :world}}
+      iex> Want.Map.cast(%{"hello" => "world"}, %{hello: [type: :enum, valid: [:world]]})
+      {:ok, %{hello: :world}}
 
-    iex> Want.Map.cast(%{"hello" => "world"}, %{hello: [], foo: []})
-    {:ok, %{hello: "world"}}
+      iex> Want.Map.cast(%{"hello" => "world"}, %{hello: [], foo: []})
+      {:ok, %{hello: "world"}}
 
-    iex> Want.Map.cast(%{"hello" => %{"foo" => "bar"}}, %{hello: %{foo: [type: :atom]}})
-    {:ok, %{hello: %{foo: :bar}}}
+      iex> Want.Map.cast(%{"hello" => %{"foo" => "bar"}}, %{hello: %{foo: [type: :atom]}})
+      {:ok, %{hello: %{foo: :bar}}}
 
-    iex> Want.Map.cast(%{"id" => "bananas"}, %{id: [type: :integer, default: 1]}, merge: %{id: 2})
-    {:ok, %{id: 2}}
+      iex> Want.Map.cast(%{"id" => "bananas"}, %{id: [type: :integer, default: 1]}, merge: %{id: 2})
+      {:ok, %{id: 2}}
 
-    iex> Want.Map.cast(%{"id" => "bananas"}, %{id: [type: :any]})
-    {:ok, %{id: "bananas"}}
+      iex> Want.Map.cast(%{"id" => "bananas"}, %{id: [type: :any]})
+      {:ok, %{id: "bananas"}}
 
-    iex> Want.Map.cast(%{"a" => %{"b" => %{"c" => 100}}}, %{id: [type: :integer, from: {"a", "b", "c"}]})
-    {:ok, %{id: 100}}
+      iex> Want.Map.cast(%{"a" => %{"b" => %{"c" => 100}}}, %{id: [type: :integer, from: {"a", "b", "c"}]})
+      {:ok, %{id: 100}}
   """
   @spec cast(value :: input(), schema :: schema()) :: result()
   def cast(input, schema),

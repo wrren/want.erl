@@ -15,17 +15,17 @@ defmodule Want.Atom do
 
   ## Examples
 
-    iex> Want.Atom.cast("hello")
-    {:ok, :hello}
+      iex> Want.Atom.cast("hello")
+      {:ok, :hello}
 
-    iex> Want.Atom.cast(1.0)
-    {:ok, :'1.0'}
+      iex> Want.Atom.cast(1.0)
+      {:ok, :'1.0'}
 
-    iex> Want.Atom.cast({:a, :b})
-    {:error, "Failed to convert value {:a, :b} to atom."}
+      iex> Want.Atom.cast({:a, :b})
+      {:error, "Failed to convert value {:a, :b} to atom."}
 
-    iex> Want.Atom.cast("10", exists: true)
-    {:error, "An atom matching the given value does not exist."}
+      iex> Want.Atom.cast("10", exists: true)
+      {:error, "An atom matching the given value does not exist."}
   """
   @spec cast(value :: any()) :: result()
   def cast(value),

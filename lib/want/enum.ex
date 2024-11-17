@@ -17,11 +17,11 @@ defmodule Want.Enum do
 
   ## Examples
 
-    iex> Want.Enum.cast("hello", valid: [:hello, :world])
-    {:ok, :hello}
+      iex> Want.Enum.cast("hello", valid: [:hello, :world])
+      {:ok, :hello}
 
-    iex> Want.Enum.cast("hello", valid: ["hello", :world])
-    {:ok, "hello"}
+      iex> Want.Enum.cast("hello", valid: ["hello", :world])
+      {:ok, "hello"}
   """
   @spec cast(value :: any(), opts :: Keyword.t()) :: result()
   def cast(value, opts) when is_list(opts) do
