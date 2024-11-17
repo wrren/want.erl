@@ -11,7 +11,7 @@ in `mix.exs`:
 
 ```elixir
 def deps do
-  [{:want, "~> 1.13"}]
+  [{:want, "~> 1.14"}]
 end
 ```
 
@@ -20,44 +20,54 @@ end
 Conversion between types in Erlang.
 
 ```erlang
-
-1 			= want:integer( "1" ),
-1.0 		= want:float( "1" ),
-"1.0"		= want:string( 1 ),
-<<"1.0">>	= want:binary( 1 ),
-true		= want:boolean( "true" ),
-	
+% String to integer
+1 = want:integer( "1" ),
+% String to float
+1.0 = want:float( "1" ),
+% Integer to String
+"1.0" = want:string( 1 ),
+% Integer to binary
+<<"1.0">> = want:binary( 1 ),
+% String to boolean
+true = want:boolean( "true" ),
 ```
 
 Conversion between types in Elixir.
 
 ```elixir
-
-{:ok, 1}    = Want.integer("1")
-1           = Want.integer!("1")
-{:ok, 1.0}  = Want.float("1")
-1.0         = Want.float!("1")
-{:ok, "1"}  = Want.string(1)
-"1"         = Want.string!(1)
+# String to integer
+{:ok, 1} = Want.integer("1")
+# String to integer, raise on failure
+1 = Want.integer!("1")
+# String to float
+{:ok, 1.0} = Want.float("1")
+# String to float, raise on failure
+1.0 = Want.float!("1")
+# Integer to string
+{:ok, "1"} = Want.string(1)
+# Integer to string, raise on failure
+"1" = Want.string!(1)
+# String to boolean
 {:ok, true} = Want.boolean("true")
-true        = Want.boolean!("true")
-
+{:ok, false} = Want.boolean("FALSE")
+# String to boolean, raise on failure
+true = Want.boolean!("true")
 ```
 
 ## Complex Type Conversions in Elixir
 
 ```elixir
 
-# Binary to Integer
-{:ok, 1}                                = Want.integer("foo", default: 1)
-# Map to Keyword List
-{:ok, [id: 1]}                          = Want.keywords(%{"id" => "bananas"}, %{id: [type: :integer, default: 1]})
-# Map to Map
-{:ok, %{hello: "world", foo: :bar}}     = Want.map(%{"hello" => "world", "foo" => "bar"}, %{hello: [], foo: [type: :atom]}) 
+# Binary to Integer with default value used on conversion failure
+{:ok, 1} = Want.integer("foo", default: 1)
+# Map to Keyword List with default values used on conversion failure
+{:ok, [id: 1]} = Want.keywords(%{"id" => "bananas"}, %{id: [type: :integer, default: 1]})
+# Map to Map with field type conversions
+{:ok, %{hello: "world", foo: :bar}} = Want.map(%{"hello" => "world", "foo" => "bar"}, %{hello: [], foo: [type: :atom]}) 
 # Nested Key Extraction
-{:ok, %{id: 100}}                       = Want.Map.cast(%{"a" => %{"b" => %{"c" => 100}}}, %{id: [type: :integer, from: {"a", "b", "c"}]})
+{:ok, %{id: 100}} = Want.Map.cast(%{"a" => %{"b" => %{"c" => 100}}}, %{id: [type: :integer, from: {"a", "b", "c"}]})
 # Key extraction from multiple potential fields, first match wins
-{:ok, %{id: 100}}                       = Want.Map.cast(%{"b" => "100", "c" => "200"}, %{id: [type: :integer, from: ["a", "b", "c"]]})
+{:ok, %{id: 100}} = Want.Map.cast(%{"b" => "100", "c" => "200"}, %{id: [type: :integer, from: ["a", "b", "c"]]})
 ```
 
 ## Shape Definitions
