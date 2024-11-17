@@ -29,7 +29,7 @@ defmodule Want.Map do
       end)
       |> case do
         kv when is_list(kv) ->
-          {:ok, Enum.reverse(kv)}
+          {:ok, Enum.sort_by(kv, fn {k, _v} -> k end, :asc)}
         error ->
           {:error, error}
       end

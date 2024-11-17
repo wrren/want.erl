@@ -33,15 +33,20 @@ true        = Want.boolean!("true")
 
 ```
 
-Complex type conversions in Elixir.
+## Complex Type Conversions in Elixir
 
 ```elixir
-{:ok, 1}                                = Want.integer("foo", default: 1)
-{:ok, [id: 1]}                          = Want.keywords(%{"id" => "bananas"}, %{id: [type: :integer, default: 1]})
-{:ok, %{hello: "world", foo: :bar}}     = Want.map(%{"hello" => "world", "foo" => "bar"}, %{hello: [], foo: [type: :atom]}) 
 
-# Nest Key Extraction
+# Binary to Integer
+{:ok, 1}                                = Want.integer("foo", default: 1)
+# Map to Keyword List
+{:ok, [id: 1]}                          = Want.keywords(%{"id" => "bananas"}, %{id: [type: :integer, default: 1]})
+# Map to Map
+{:ok, %{hello: "world", foo: :bar}}     = Want.map(%{"hello" => "world", "foo" => "bar"}, %{hello: [], foo: [type: :atom]}) 
+# Nested Key Extraction
 {:ok, %{id: 100}}                       = Want.Map.cast(%{"a" => %{"b" => %{"c" => 100}}}, %{id: [type: :integer, from: {"a", "b", "c"}]})
+# Key extraction from multiple potential fields, first match wins
+{:ok, %{id: 100}}                       = Want.Map.cast(%{"b" => "100", "c" => "200"}, %{id: [type: :integer, from: ["a", "b", "c"]]})
 ```
 
 ## Shape Definitions
@@ -54,16 +59,22 @@ defmodule MyModule do
     use Want.Shape
 
     shape do
-        field :is_valid,    :boolean, default: false
-        field :count,       :integer, default: 0
-        field :from,        :string, from: "FromField"
+        field :is_valid,    :boolean,   default: false
+        field :count,       :integer,   default: 0
+        field :from,        :string,    from: "FromField"
+        field :multi_from,  :integer,   from: ["a", {"b", "c", "d"}], default: 0
     end
 end
 
-{:ok, %MyModule{is_valid: true, count: 10, from: "Foo"}} = MyModule.cast(%{
+{:ok, %MyModule{is_valid: true, count: 10, from: "Foo", multi_from: 10}} = MyModule.cast(%{
     "is_valid"  => "true",
     "count"     => "10",
-    "from"      => "Foo"
+    "from"      => "Foo",
+    "b"         => %{
+        "c" => %{
+            "d" => 10
+        }
+    }
 })
 
 ```

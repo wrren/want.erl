@@ -28,7 +28,7 @@ defmodule Want.Keyword do
       end)
       |> case do
         kv when is_list(kv) ->
-          {:ok, Enum.reverse(kv)}
+          {:ok, Enum.sort_by(kv, fn {k, _} -> k end, :asc)}
         error ->
           {:error, error}
       end
