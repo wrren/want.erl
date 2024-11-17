@@ -56,23 +56,24 @@ defmodule Want do
 
   ## Examples
 
-    iex> Want.string(1)
-    {:ok, "1"}
+      iex> Want.string(1)
+      {:ok, "1"}
 
-    iex> Want.string({:a, :b}, default: "string")
-    {:ok, "string"}
+      iex> Want.string({:a, :b}, default: "string")
+      {:ok, "string"}
 
-    iex> Want.string(:hello, max: 3)
-    {:error, "String length exceeds maximum of 3."}
+      iex> Want.string(:hello, max: 3)
+      {:error, "String length exceeds maximum of 3."}
 
-    iex> Want.string("hello%20world", decode: :uri)
-    {:ok, "hello world"}
+      iex> Want.string("hello%20world", decode: :uri)
+      {:ok, "hello world"}
 
-    iex> Want.string(:a, min: 3)
-    {:error, "String length below minimum of 3."}
+      iex> Want.string(:a, min: 3)
+      {:error, "String length below minimum of 3."}
 
-    iex> Want.string(:a, matches: ~r/a/)
-    {:ok, "a"}
+      iex> Want.string(:a, matches: ~r/a/)
+      {:ok, "a"}
+
   """
   def string(value),
     do: string(value, [])
@@ -98,17 +99,18 @@ defmodule Want do
 
   ## Examples
 
-    iex> Want.integer(1.0)
-    {:ok, 1}
+      iex> Want.integer(1.0)
+      {:ok, 1}
 
-    iex> Want.integer({:a, :b}, default: 1)
-    {:ok, 1}
+      iex> Want.integer({:a, :b}, default: 1)
+      {:ok, 1}
 
-    iex> Want.integer(:'5', max: 3)
-    {:error, "Integer value exceeds maximum 3."}
+      iex> Want.integer(:'5', max: 3)
+      {:error, "Integer value exceeds maximum 3."}
 
-    iex> Want.integer("1", min: 3)
-    {:error, "Integer value below minimum 3."}
+      iex> Want.integer("1", min: 3)
+      {:error, "Integer value below minimum 3."}
+
   """
   def integer(value),
     do: integer(value, [])
@@ -134,17 +136,18 @@ defmodule Want do
 
   ## Examples
 
-    iex> Want.float(1.0)
-    {:ok, 1.0}
+      iex> Want.float(1.0)
+      {:ok, 1.0}
 
-    iex> Want.float({:a, :b}, default: 1.0)
-    {:ok, 1.0}
+      iex> Want.float({:a, :b}, default: 1.0)
+      {:ok, 1.0}
 
-    iex> Want.float(:'5.0', max: 3.0)
-    {:error, "Float value exceeds maximum 3.0."}
+      iex> Want.float(:'5.0', max: 3.0)
+      {:error, "Float value exceeds maximum 3.0."}
 
-    iex> Want.float("1.0", min: 3.0)
-    {:error, "Float value below minimum 3.0."}
+      iex> Want.float("1.0", min: 3.0)
+      {:error, "Float value below minimum 3.0."}
+
   """
   def float(value),
     do: float(value, [])
@@ -168,20 +171,21 @@ defmodule Want do
 
   ## Examples
 
-    iex> Want.boolean("true")
-    {:ok, true}
+      iex> Want.boolean("true")
+      {:ok, true}
 
-    iex> Want.boolean("FALSE")
-    {:ok, false}
+      iex> Want.boolean("FALSE")
+      {:ok, false}
 
-    iex> Want.boolean(1.0)
-    {:ok, true}
+      iex> Want.boolean(1.0)
+      {:ok, true}
 
-    iex> Want.boolean({:a, :b})
-    {:error, "Failed to convert value {:a, :b} to boolean."}
+      iex> Want.boolean({:a, :b})
+      {:error, "Failed to convert value {:a, :b} to boolean."}
 
-    iex> Want.boolean({:a, :b}, default: true)
-    {:ok, true}
+      iex> Want.boolean({:a, :b}, default: true)
+      {:ok, true}
+
   """
   def boolean(value),
     do: boolean(value, [])
@@ -206,20 +210,21 @@ defmodule Want do
 
   ## Examples
 
-    iex> Want.atom("hello")
-    {:ok, :hello}
+      iex> Want.atom("hello")
+      {:ok, :hello}
 
-    iex> Want.atom(1.0)
-    {:ok, :'1.0'}
+      iex> Want.atom(1.0)
+      {:ok, :'1.0'}
 
-    iex> Want.atom({:a, :b})
-    {:error, "Failed to convert value {:a, :b} to atom."}
+      iex> Want.atom({:a, :b})
+      {:error, "Failed to convert value {:a, :b} to atom."}
 
-    iex> Want.atom({:a, :b}, default: :c)
-    {:ok, :c}
+      iex> Want.atom({:a, :b}, default: :c)
+      {:ok, :c}
 
-    iex> Want.atom("10", exists: true)
-    {:error, "An atom matching the given value does not exist."}
+      iex> Want.atom("10", exists: true)
+      {:error, "An atom matching the given value does not exist."}
+
   """
   def atom(value),
     do: atom(value, [])
@@ -239,14 +244,15 @@ defmodule Want do
 
   ## Examples
 
-    iex> Want.datetime("2020-02-06 18:23:55.850218Z")
-    {:ok, ~U[2020-02-06 18:23:55.850218Z]}
+      iex> Want.datetime("2020-02-06 18:23:55.850218Z")
+      {:ok, ~U[2020-02-06 18:23:55.850218Z]}
 
-    iex> Want.datetime({{2020, 02, 06}, {18, 23, 55}})
-    {:ok, ~U[2020-02-06 18:23:55Z]}
+      iex> Want.datetime({{2020, 02, 06}, {18, 23, 55}})
+      {:ok, ~U[2020-02-06 18:23:55Z]}
 
-    iex> Want.datetime({{2020, 02, 06}, {18, 23, 55, 123456}})
-    {:ok, ~U[2020-02-06 18:23:55.123456Z]}
+      iex> Want.datetime({{2020, 02, 06}, {18, 23, 55, 123456}})
+      {:ok, ~U[2020-02-06 18:23:55.123456Z]}
+
   """
   def datetime(value),
     do: datetime(value, [])
@@ -271,14 +277,14 @@ defmodule Want do
 
   ## Examples
 
-    iex> Want.sort("inserted_at:desc", fields: [:inserted_at, :id, :name])
-    {:ok, {:inserted_at, :desc}}
+      iex> Want.sort("inserted_at:desc", fields: [:inserted_at, :id, :name])
+      {:ok, {:inserted_at, :desc}}
 
-    iex> Want.sort("updated_at", fields: [:inserted_at, :id], default: {:id, :asc})
-    {:ok, {:id, :asc}}
+      iex> Want.sort("updated_at", fields: [:inserted_at, :id], default: {:id, :asc})
+      {:ok, {:id, :asc}}
 
-    iex> Want.sort("updated_at:asc", [])
-    {:error, "You must specify a list of valid sort fields using the :fields option."}
+      iex> Want.sort("updated_at:asc", [])
+      {:error, "You must specify a list of valid sort fields using the :fields option."}
 
   """
   def sort(input, opts),
@@ -297,14 +303,15 @@ defmodule Want do
 
   ## Examples
 
-    iex> Want.enum("hello", valid: [:hello, :world])
-    {:ok, :hello}
+      iex> Want.enum("hello", valid: [:hello, :world])
+      {:ok, :hello}
 
-    iex> Want.enum("hello", valid: ["hello", :world])
-    {:ok, "hello"}
+      iex> Want.enum("hello", valid: ["hello", :world])
+      {:ok, "hello"}
 
-    iex> Want.enum("foo", valid: ["hello", :world], default: :bar)
-    {:ok, :bar}
+      iex> Want.enum("foo", valid: ["hello", :world], default: :bar)
+      {:ok, :bar}
+
   """
   def enum(input, opts),
     do: maybe_default(Want.Enum.cast(input, opts), opts)
@@ -325,23 +332,24 @@ defmodule Want do
 
   ## Examples
 
-    iex> Want.list("1")
-    {:ok, ["1"]}
+      iex> Want.list("1")
+      {:ok, ["1"]}
 
-    iex> Want.list("1", element: [type: :integer])
-    {:ok, [1]}
+      iex> Want.list("1", element: [type: :integer])
+      {:ok, [1]}
 
-    iex> Want.list("1,2,3,4", element: [type: :integer])
-    {:ok, [1, 2, 3, 4]}
+      iex> Want.list("1,2,3,4", element: [type: :integer])
+      {:ok, [1, 2, 3, 4]}
 
-    iex> Want.list("1:2:3:4", separator: ":", element: [type: :integer])
-    {:ok, [1, 2, 3, 4]}
+      iex> Want.list("1:2:3:4", separator: ":", element: [type: :integer])
+      {:ok, [1, 2, 3, 4]}
 
-    iex> Want.list("hello:world", separator: ":", element: [type: :enum, valid: [:hello, :world]])
-    {:ok, [:hello, :world]}
+      iex> Want.list("hello:world", separator: ":", element: [type: :enum, valid: [:hello, :world]])
+      {:ok, [:hello, :world]}
 
-    iex> Want.list("hello:world", separator: ":", element: [type: :enum, valid: [:hello]])
-    {:ok, [:hello]}
+      iex> Want.list("hello:world", separator: ":", element: [type: :enum, valid: [:hello]])
+      {:ok, [:hello]}
+
   """
   def list(input, opts \\ []),
     do: maybe_default(Want.List.cast(input, opts), opts)
@@ -368,26 +376,27 @@ defmodule Want do
 
   ## Examples
 
-    iex> Want.map(%{"id" => 1}, %{id: [type: :integer]})
-    {:ok, %{id: 1}}
+      iex> Want.map(%{"id" => 1}, %{id: [type: :integer]})
+      {:ok, %{id: 1}}
 
-    iex> Want.map(%{"identifier" => 1}, %{id: [type: :integer, from: :identifier]})
-    {:ok, %{id: 1}}
+      iex> Want.map(%{"identifier" => 1}, %{id: [type: :integer, from: :identifier]})
+      {:ok, %{id: 1}}
 
-    iex> Want.map(%{}, %{id: [type: :integer, default: 1]})
-    {:ok, %{id: 1}}
+      iex> Want.map(%{}, %{id: [type: :integer, default: 1]})
+      {:ok, %{id: 1}}
 
-    iex> Want.map(%{"id" => "bananas"}, %{id: [type: :integer, default: 1]})
-    {:ok, %{id: 1}}
+      iex> Want.map(%{"id" => "bananas"}, %{id: [type: :integer, default: 1]})
+      {:ok, %{id: 1}}
 
-    iex> Want.map(%{"hello" => "world", "foo" => "bar"}, %{hello: [], foo: [type: :atom]})
-    {:ok, %{hello: "world", foo: :bar}}
+      iex> Want.map(%{"hello" => "world", "foo" => "bar"}, %{hello: [], foo: [type: :atom]})
+      {:ok, %{hello: "world", foo: :bar}}
 
-    iex> Want.map(%{"hello" => %{"foo" => "bar"}}, %{hello: %{foo: [type: :atom]}})
-    {:ok, %{hello: %{foo: :bar}}}
+      iex> Want.map(%{"hello" => %{"foo" => "bar"}}, %{hello: %{foo: [type: :atom]}})
+      {:ok, %{hello: %{foo: :bar}}}
 
-    iex> Want.map(%{"id" => "bananas"}, %{id: [type: :integer, default: 1]}, merge: %{id: 2})
-    {:ok, %{id: 2}}
+      iex> Want.map(%{"id" => "bananas"}, %{id: [type: :integer, default: 1]}, merge: %{id: 2})
+      {:ok, %{id: 2}}
+
   """
   def map(input, schema, opts \\ []),
     do: Want.Map.cast(input, schema, opts)
@@ -413,29 +422,30 @@ defmodule Want do
 
   ## Examples
 
-    iex> Want.keywords(%{"id" => 1}, %{id: [type: :integer]})
-    {:ok, [id: 1]}
+      iex> Want.keywords(%{"id" => 1}, %{id: [type: :integer]})
+      {:ok, [id: 1]}
 
-    iex> Want.keywords(%{"identifier" => 1}, %{id: [type: :integer, from: :identifier]})
-    {:ok, [id: 1]}
+      iex> Want.keywords(%{"identifier" => 1}, %{id: [type: :integer, from: :identifier]})
+      {:ok, [id: 1]}
 
-    iex> Want.keywords(%{}, %{id: [type: :integer, default: 1]})
-    {:ok, [id: 1]}
+      iex> Want.keywords(%{}, %{id: [type: :integer, default: 1]})
+      {:ok, [id: 1]}
 
-    iex> Want.keywords(%{"id" => "bananas"}, %{id: [type: :integer, default: 1]})
-    {:ok, [id: 1]}
+      iex> Want.keywords(%{"id" => "bananas"}, %{id: [type: :integer, default: 1]})
+      {:ok, [id: 1]}
 
-    iex> Want.keywords(%{"identifier" => "bananas"}, %{id: [type: :integer, default: 1, from: :identifier]})
-    {:ok, [id: 1]}
+      iex> Want.keywords(%{"identifier" => "bananas"}, %{id: [type: :integer, default: 1, from: :identifier]})
+      {:ok, [id: 1]}
 
-    iex> Want.keywords(%{"hello" => "world", "foo" => "bar"}, %{hello: [], foo: [type: :atom]})
-    {:ok, [hello: "world", foo: :bar]}
+      iex> Want.keywords(%{"hello" => "world", "foo" => "bar"}, %{hello: [], foo: [type: :atom]})
+      {:ok, [hello: "world", foo: :bar]}
 
-    iex> Want.keywords(%{"hello" => %{"foo" => "bar"}}, %{hello: %{foo: [type: :atom]}})
-    {:ok, [hello: [foo: :bar]]}
+      iex> Want.keywords(%{"hello" => %{"foo" => "bar"}}, %{hello: %{foo: [type: :atom]}})
+      {:ok, [hello: [foo: :bar]]}
 
-    iex> Want.keywords(%{"id" => "bananas"}, %{id: [type: :integer, default: 1]}, merge: [id: 2])
-    {:ok, [id: 2]}
+      iex> Want.keywords(%{"id" => "bananas"}, %{id: [type: :integer, default: 1]}, merge: [id: 2])
+      {:ok, [id: 2]}
+
   """
   def keywords(input, schema, opts \\ []),
     do: Want.Keyword.cast(input, schema, opts)
@@ -458,26 +468,27 @@ defmodule Want do
 
   ## Examples
 
-    iex> Want.dump({:inserted_at, :desc})
-    {:ok, "inserted_at:desc"}
+      iex> Want.dump({:inserted_at, :desc})
+      {:ok, "inserted_at:desc"}
 
-    iex> Want.dump({:inserted_at, :desc}, update: :inserted_at)
-    {:ok, "inserted_at:asc"}
+      iex> Want.dump({:inserted_at, :desc}, update: :inserted_at)
+      {:ok, "inserted_at:asc"}
 
-    iex> Want.dump({:inserted_at, :desc}, update: :updated_at)
-    {:ok, "updated_at:asc"}
+      iex> Want.dump({:inserted_at, :desc}, update: :updated_at)
+      {:ok, "updated_at:asc"}
 
-    iex> Want.dump("hello")
-    {:ok, "hello"}
+      iex> Want.dump("hello")
+      {:ok, "hello"}
 
-    iex> Want.dump(%{hello: :world, sort: {:inserted_at, :desc}})
-    {:ok, [hello: :world, sort: "inserted_at:desc"]}
+      iex> Want.dump(%{hello: :world, sort: {:inserted_at, :desc}})
+      {:ok, [hello: :world, sort: "inserted_at:desc"]}
 
-    iex> Want.dump(%{hello: :world, sort: {:inserted_at, :desc}}, update: [sort: :inserted_at])
-    {:ok, [hello: :world, sort: "inserted_at:asc"]}
+      iex> Want.dump(%{hello: :world, sort: {:inserted_at, :desc}}, update: [sort: :inserted_at])
+      {:ok, [hello: :world, sort: "inserted_at:asc"]}
 
-    iex> Want.dump({:a, :b, :c})
-    {:error, "Unrecognized dump input {:a, :b, :c}"}
+      iex> Want.dump({:a, :b, :c})
+      {:error, "Unrecognized dump input {:a, :b, :c}"}
+
   """
   def dump(input),
     do: dump(input, [])
