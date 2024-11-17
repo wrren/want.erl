@@ -2,12 +2,22 @@ defmodule Want.ShapeTest do
   use Want.Shape
   use ExUnit.Case, async: true
 
+  defmodule Inner do
+    use Want.Shape
+
+    shape do
+      field :int,   :integer
+    end
+  end
+
   shape do
     field :is_valid,    :boolean, default: false
     field :is_integer,  :integer, default: 100
     field :from,        :string, from: "WierdField", default: "Hello, World!"
     field :hello,       :enum, valid: [:default, :world], default: :default
     field :multi_from,  :integer, from: [{"a", "b", "c"}, "OtherField"], default: 0
+    field :inner,       Want.ShapeTest.Inner, default: nil
+    field :inner_array, {:array, Want.ShapeTest.Inner}, from: "list", default: []
   end
 
   describe "cast/1" do
@@ -15,25 +25,31 @@ defmodule Want.ShapeTest do
       assert Want.ShapeTest.cast!(%{
         "is_valid"    => "true",
         "is_integer"  => "1",
-        "hello"       => "World"
+        "hello"       => "World",
+        "inner"       => %{"int" => 150}
       }) == %Want.ShapeTest{
-        is_valid: true,
-        is_integer: 1,
-        from: "Hello, World!",
-        hello: :world,
-        multi_from: 0
+        is_valid:     true,
+        is_integer:   1,
+        from:         "Hello, World!",
+        hello:        :world,
+        multi_from:   0,
+        inner:        %Want.ShapeTest.Inner{int: 150},
+        inner_array:  []
       }
     end
 
     test "successfully casts a valid map with missing fields" do
       assert Want.ShapeTest.cast!(%{
-        "is_integer" => "1"
+        "is_integer" => "1",
+        "list"        => [%{"int" => 100}, %{"int" => "200"}]
       }) == %Want.ShapeTest{
         is_valid: false,
         is_integer: 1,
         from: "Hello, World!",
         hello: :default,
-        multi_from: 0
+        multi_from: 0,
+        inner:        nil,
+        inner_array:  [%Want.ShapeTest.Inner{int: 100}, %Want.ShapeTest.Inner{int: 200}]
       }
 
       assert Want.ShapeTest.cast!(%{
@@ -43,7 +59,9 @@ defmodule Want.ShapeTest do
         is_integer: 100,
         from: "Hello, World!",
         hello: :default,
-        multi_from: 0
+        multi_from: 0,
+        inner:        nil,
+        inner_array:  []
       }
     end
 
@@ -56,7 +74,9 @@ defmodule Want.ShapeTest do
         is_integer: 1,
         from: "Bar",
         hello: :default,
-        multi_from: 0
+        multi_from: 0,
+        inner:        nil,
+        inner_array:  []
       }
 
       assert Want.ShapeTest.cast!(%{
@@ -68,7 +88,9 @@ defmodule Want.ShapeTest do
         is_integer: 1,
         from: "Bar",
         hello: :default,
-        multi_from: 2
+        multi_from: 2,
+        inner:        nil,
+        inner_array:  []
       }
 
       assert Want.ShapeTest.cast!(%{
@@ -80,7 +102,9 @@ defmodule Want.ShapeTest do
         is_integer: 1,
         from: "Bar",
         hello: :default,
-        multi_from: 100
+        multi_from: 100,
+        inner:        nil,
+        inner_array:  []
       }
     end
   end

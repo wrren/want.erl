@@ -2,7 +2,7 @@ defmodule Want.MixProject do
   use Mix.Project
 
   @source_url "https://github.com/wrren/want.erl"
-  @version    "1.14.4"
+  @version    "1.15.0"
 
   def project do
     [

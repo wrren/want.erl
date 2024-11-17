@@ -120,12 +120,28 @@ defmodule Want.Map do
 
       iex> Want.Map.cast(%{"a" => %{"b" => %{"c" => 100}}}, %{id: [type: :integer, from: {"a", "b", "c"}]})
       {:ok, %{id: 100}}
+
+      iex> Want.Map.cast(%{"a" => [1, 2, 3, 4]}, %{a: [type: {:array, :integer}]})
+      {:ok, %{a: [1, 2, 3, 4]}}
+
   """
   @spec cast(value :: input(), schema :: schema()) :: result()
   def cast(input, schema),
     do: cast(input, schema, [])
   @spec cast(value :: input(), schema :: schema(), opts :: Keyword.t()) :: result()
-  def cast(input, schema, opts) when is_map(schema) and (is_list(input) or is_map(input)) do
+  def cast(input, {:array, type}, opts) when is_list(input) do
+    Enum.reduce_while(input, {:ok, []}, fn(elem, {:ok, out}) ->
+      case cast(elem, type, opts) do
+        {:ok, value}      -> {:cont, {:ok, [value | out]}}
+        {:error, reason}  -> {:halt, {:error, reason}}
+      end
+    end)
+    |> case do
+      {:ok, list}   -> {:ok, Enum.reverse(list)}
+      other         -> other
+    end
+  end
+  def cast(input, schema, opts) when is_map(schema) and (is_list(input) or is_map(input)) and not is_atom(schema) do
     schema
     |> Enum.reduce_while(%{}, fn({key, field_opts}, out) ->
       with  {:error, reason}      <- cast(input, field_opts[:from] || key, field_opts),
@@ -207,15 +223,19 @@ defmodule Want.Map do
     end
   end
   def cast(input, key, opts) when (is_list(input) or (is_map(input) and not is_struct(input))) and is_atom(key) and not is_nil(key) do
-    input
-    |> Enum.find(fn
-      {k, _v} when is_atom(k)     -> k == key
-      {k, _v} when is_binary(k)   -> k == Atom.to_string(key)
-      _                           -> false
-    end)
-    |> case do
-      {_, v}  -> cast(v, type(opts), opts)
-      nil     -> {:error, "key #{inspect key} not found"}
+    if Want.Shape.is_shape?(key) do
+      Want.Shape.cast(key, input)
+    else
+      input
+      |> Enum.find(fn
+        {k, _v} when is_atom(k)     -> k == key
+        {k, _v} when is_binary(k)   -> k == Atom.to_string(key)
+        _                           -> false
+      end)
+      |> case do
+        {_, v}  -> cast(v, type(opts), opts)
+        nil     -> {:error, "key #{inspect key} not found"}
+      end
     end
   end
   def cast(input, :boolean, opts),

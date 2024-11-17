@@ -29,8 +29,10 @@ defmodule Want do
   @doc """
   Determine whether the given type name is valid.
   """
+  def is_valid_type?({:array, type}),
+    do: Enum.member?(valid_types(), type) or (is_atom(type) and Want.Shape.is_shape?(type))
   def is_valid_type?(type),
-    do: Enum.member?(valid_types(), type)
+    do: Enum.member?(valid_types(), type) or (is_atom(type) and Want.Shape.is_shape?(type))
 
   @doc """
   Check whether the given type name is valid and raise if not.
