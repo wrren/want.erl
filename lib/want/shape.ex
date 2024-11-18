@@ -31,7 +31,7 @@ defmodule Want.Shape do
   """
   @spec is_shape?(module()) :: boolean()
   def is_shape?(module) when is_atom(module) do
-    case :code.ensure_loaded(module) do
+    case Code.ensure_compiled(module) do
       {:module, _}  -> Kernel.function_exported?(module, :__fields__, 0)
       _             -> false
     end
