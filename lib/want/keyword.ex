@@ -114,6 +114,9 @@ defmodule Want.Keyword do
       iex> Want.Keyword.cast(%{"a" => [1, 2, 3, 4]}, %{a: [type: {:array, :integer}]})
       {:ok, [a: [1, 2, 3, 4]]}
 
+      iex> Want.Keyword.cast(%{"a" => %{"b" => %{"c" => 100}}}, %{id: [type: :integer, from: {"a", "b", "c"}, transform: fn x -> x * 2 end]})
+      {:ok, [id: 200]}
+
   """
   @spec cast(value :: input(), schema :: schema()) :: result()
   def cast(input, schema),
@@ -122,7 +125,7 @@ defmodule Want.Keyword do
   def cast(input, {:array, type}, opts) when is_list(input) do
     Enum.reduce_while(input, {:ok, []}, fn(elem, {:ok, out}) ->
       case cast(elem, type, opts) do
-        {:ok, value}      -> {:cont, {:ok, [value | out]}}
+        {:ok, value}      -> {:cont, {:ok, [maybe_transform(value, opts) | out]}}
         {:error, reason}  -> {:halt, {:error, reason}}
       end
     end)
@@ -137,10 +140,10 @@ defmodule Want.Keyword do
       with  {:error, reason}      <- cast(input, field_opts[:from] || key, field_opts),
             {false, _reason}      <- {is_map(field_opts), reason},
             {{:ok, default}, _}   <- {merge_or_default(key, field_opts, opts), reason} do
-        {:cont, Keyword.put(out, key, default)}
+        {:cont, Keyword.put(out, key, maybe_transform(default, field_opts))}
       else
         {:ok, value} ->
-          {:cont, Keyword.put(out, key, value)}
+          {:cont, Keyword.put(out, key, maybe_transform(value, field_opts))}
         {true, reason} ->
           {:halt, {:error, "Failed to cast key #{key} to map: #{reason}"}}
         {{:error, :no_default}, reason} ->
@@ -269,6 +272,22 @@ defmodule Want.Keyword do
         {:error, :no_default}
     end
   end
+
+  #
+  # Conditionally apply a transformation to a derived value based on whether the
+  # `:transform` option has been specified and is valid.
+  #
+  @spec maybe_transform(term(), Keyword.t()) :: term()
+  defp maybe_transform(value, opts) when is_list(opts) do
+    with  true  <- Keyword.has_key?(opts, :transform),
+          true  <- Kernel.is_function(opts[:transform], 1) do
+      Kernel.apply(opts[:transform], [value])
+    else
+      _ -> value
+    end
+  end
+  defp maybe_transform(value, _),
+    do: value
 
   #
   # Pull a type specified from a set of options

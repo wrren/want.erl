@@ -13,7 +13,7 @@ defmodule Want.ShapeTest do
   shape do
     field :is_valid,    :boolean, default: false
     field :is_integer,  :integer, default: 100
-    field :from,        :string, from: "WierdField", default: "Hello, World!"
+    field :from,        :string, from: "WeirdField", default: "Hello, World!", transform: &String.upcase/1
     field :hello,       :enum, valid: [:default, :world], default: :default
     field :multi_from,  :integer, from: [{"a", "b", "c"}, "OtherField"], default: 0
     field :inner,       Want.ShapeTest.Inner, default: nil
@@ -30,7 +30,7 @@ defmodule Want.ShapeTest do
       }) == %Want.ShapeTest{
         is_valid:     true,
         is_integer:   1,
-        from:         "Hello, World!",
+        from:         "HELLO, WORLD!",
         hello:        :world,
         multi_from:   0,
         inner:        %Want.ShapeTest.Inner{int: 150},
@@ -43,68 +43,68 @@ defmodule Want.ShapeTest do
         "is_integer" => "1",
         "list"        => [%{"int" => 100}, %{"int" => "200"}]
       }) == %Want.ShapeTest{
-        is_valid: false,
-        is_integer: 1,
-        from: "Hello, World!",
-        hello: :default,
-        multi_from: 0,
-        inner:        nil,
-        inner_array:  [%Want.ShapeTest.Inner{int: 100}, %Want.ShapeTest.Inner{int: 200}]
+        is_valid:       false,
+        is_integer:     1,
+        from:           "HELLO, WORLD!",
+        hello:          :default,
+        multi_from:     0,
+        inner:          nil,
+        inner_array:    [%Want.ShapeTest.Inner{int: 100}, %Want.ShapeTest.Inner{int: 200}]
       }
 
       assert Want.ShapeTest.cast!(%{
         "is_valid" => "true"
       }) == %Want.ShapeTest{
-        is_valid: true,
-        is_integer: 100,
-        from: "Hello, World!",
-        hello: :default,
-        multi_from: 0,
-        inner:        nil,
-        inner_array:  []
+        is_valid:       true,
+        is_integer:     100,
+        from:           "HELLO, WORLD!",
+        hello:          :default,
+        multi_from:     0,
+        inner:          nil,
+        inner_array:    []
       }
     end
 
     test "successfully casts from different field names" do
       assert Want.ShapeTest.cast!(%{
         "is_integer" => "1",
-        "WierdField" => "Bar"
+        "WeirdField" => "Bar"
       }) == %Want.ShapeTest{
-        is_valid: false,
-        is_integer: 1,
-        from: "Bar",
-        hello: :default,
-        multi_from: 0,
-        inner:        nil,
-        inner_array:  []
+        is_valid:       false,
+        is_integer:     1,
+        from:           "BAR",
+        hello:          :default,
+        multi_from:     0,
+        inner:          nil,
+        inner_array:    []
       }
 
       assert Want.ShapeTest.cast!(%{
         "is_integer"  => "1",
-        "WierdField"  => "Bar",
+        "WeirdField"  => "Bar",
         "OtherField"  => 2
       }) == %Want.ShapeTest{
-        is_valid: false,
-        is_integer: 1,
-        from: "Bar",
-        hello: :default,
-        multi_from: 2,
-        inner:        nil,
-        inner_array:  []
+        is_valid:       false,
+        is_integer:     1,
+        from:           "BAR",
+        hello:          :default,
+        multi_from:     2,
+        inner:          nil,
+        inner_array:    []
       }
 
       assert Want.ShapeTest.cast!(%{
         "is_integer"  => "1",
-        "WierdField"  => "Bar",
+        "WeirdField"  => "Bar",
         "a"           => %{"b" => %{"c" => "100"}}
       }) == %Want.ShapeTest{
-        is_valid: false,
-        is_integer: 1,
-        from: "Bar",
-        hello: :default,
-        multi_from: 100,
-        inner:        nil,
-        inner_array:  []
+        is_valid:       false,
+        is_integer:     1,
+        from:           "BAR",
+        hello:          :default,
+        multi_from:     100,
+        inner:          nil,
+        inner_array:    []
       }
     end
   end

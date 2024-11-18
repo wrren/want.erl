@@ -4,3 +4,8 @@
 
 * Add explicit support for boolean conversion via `Want.boolean/1`.
 * Update README and documentation for better display via hexdocs.
+
+## 1.15.5 (18.11.2024)
+
+* Various fixes to Shape casting
+* Added `:transform` option to `Want.map`, `Want.keywords`, and `Want.shape` field options, allowing a transformation to be applied to cast values.

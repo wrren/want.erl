@@ -22,7 +22,6 @@ defmodule Want.Shape do
       @spec cast!(map()) :: t()
       def cast!(data),
         do: Want.Shape.cast!(__MODULE__, data)
-
     end
   end
 
