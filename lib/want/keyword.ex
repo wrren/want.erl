@@ -168,11 +168,11 @@ defmodule Want.Keyword do
       {:error, _} -> cast(input, t, opts)
     end
   end
-  def cast(input, key, opts) when is_tuple(key) do
+  def cast(input, key, opts) when is_tuple(key) and (is_list(input) or is_map(input)) do
     key
     |> :erlang.tuple_to_list()
     |> Enum.reduce_while({input, :error}, fn
-      (key, {input, _out}) when is_binary(key) ->
+      (key, {input, _out}) when is_binary(key) and (is_list(input) or is_map(input))  ->
         input
         |> Enum.find(fn
           {k, _v} when is_atom(k)     -> Atom.to_string(k) == key
@@ -183,7 +183,7 @@ defmodule Want.Keyword do
           {_, v}  -> {:cont, {v, :ok}}
           nil     -> {:halt, {input, :error}}
         end
-      (key, {input, _out}) when is_atom(key) ->
+      (key, {input, _out}) when is_atom(key) and (is_list(input) or is_map(input))  ->
         input
         |> Enum.find(fn
           {k, _v} when is_atom(k)     -> k == key
@@ -194,6 +194,8 @@ defmodule Want.Keyword do
           {_, v}  -> {:cont, {v, :ok}}
           nil     -> {:halt, {input, :error}}
         end
+      (_key, {input, _out}) ->
+        {:halt, {input, :error}}
     end)
     |> case do
       {v, :ok}      -> cast(v, type(opts), opts)

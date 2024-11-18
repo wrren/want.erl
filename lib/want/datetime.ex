@@ -15,6 +15,14 @@ defmodule Want.DateTime do
         cast(DateTime.from_iso8601(input), opts)
     end
   end
+  def cast(input, opts) when is_integer(input) and is_list(opts) do
+    cond do
+      opts[:format] == :unix_ms ->
+        cast(DateTime.from_unix(input / 1000), opts)
+      true ->
+        cast(DateTime.from_unix(input), opts)
+    end
+  end
   def cast({{_year, _month, _day}, {_hour, _minute, _second}} = erl, opts),
     do: cast(NaiveDateTime.from_erl(erl), opts)
   def cast({{year, month, day}, {hour, minute, second, millisecond}}, opts),
