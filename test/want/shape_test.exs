@@ -14,7 +14,7 @@ defmodule Want.ShapeTest do
     field :is_valid,    :boolean, default: false
     field :is_integer,  :integer, default: 100
     field :from,        :string, from: "WeirdField", default: "Hello, World!", transform: &String.upcase/1
-    field :hello,       :enum, valid: [:default, :world], default: :default
+    field :hello,       :enum, valid: [:default, :world, :bar], default: :default
     field :multi_from,  :integer, from: [{"a", "b", "c"}, "OtherField"], default: 0
     field :inner,       Want.ShapeTest.Inner, default: nil
     field :inner_array, {:array, Want.ShapeTest.Inner}, from: "list", default: []
@@ -36,6 +36,38 @@ defmodule Want.ShapeTest do
         inner:        %Want.ShapeTest.Inner{int: 150},
         inner_array:  []
       }
+    end
+
+    test "successfully casts a list of valid maps with present fields" do
+      assert Want.ShapeTest.cast_all!([%{
+          "is_valid"    => "true",
+          "is_integer"  => "1",
+          "hello"       => "World",
+          "inner"       => %{"int" => 150}
+        },
+        %{
+          "is_valid"    => "false",
+          "is_integer"  => "2",
+          "hello"       => "bar",
+          "inner"       => %{"int" => 250}
+        }]) == [%Want.ShapeTest{
+          is_valid:     true,
+          is_integer:   1,
+          from:         "HELLO, WORLD!",
+          hello:        :world,
+          multi_from:   0,
+          inner:        %Want.ShapeTest.Inner{int: 150},
+          inner_array:  []
+        },
+        %Want.ShapeTest{
+          is_valid:     false,
+          is_integer:   2,
+          from:         "HELLO, WORLD!",
+          hello:        :bar,
+          multi_from:   0,
+          inner:        %Want.ShapeTest.Inner{int: 250},
+          inner_array:  []
+        }]
     end
 
     test "successfully casts a valid map with missing fields" do

@@ -22,6 +22,20 @@ defmodule Want.Shape do
       @spec cast!(map()) :: t()
       def cast!(data),
         do: Want.Shape.cast!(__MODULE__, data)
+
+      @doc """
+      Cast a list of maps to a list of Shapes.
+      """
+      @spec cast_all(list(map())) :: {:ok, list(t())} | {:error, reason :: term()}
+      def cast_all(data),
+        do: Want.Shape.cast_all(__MODULE__, data)
+
+      @doc """
+      Cast a list of maps to a list of Shapes.
+      """
+      @spec cast_all!(list(map())) :: list(t())
+      def cast_all!(data),
+        do: Want.Shape.cast_all!(__MODULE__, data)
     end
   end
 
@@ -72,6 +86,34 @@ defmodule Want.Shape do
   def cast!(shape, data) when is_atom(shape) and is_map(data) do
     case cast(shape, data) do
       {:ok, struct}     -> struct
+      {:error, reason}  -> raise reason
+    end
+  end
+
+  @doc """
+  Cast a list of maps to a list of Shapes.
+  """
+  @spec cast_all(module(), map()) :: {:ok, struct()} | {:error, reason :: term()}
+  def cast_all(shape, data) when is_atom(shape) and is_list(data) do
+    Enum.reduce_while(data, {:ok, []}, fn(data, {:ok, out}) ->
+      case cast(shape, data) do
+        {:ok, struct}     -> {:cont, {:ok, [struct | out]}}
+        {:error, reason}  -> {:halt, {:error, reason}}
+      end
+    end)
+    |> case do
+      {:ok, structs}    -> {:ok, Enum.reverse(structs)}
+      {:error, reason}  -> {:error, reason}
+    end
+  end
+
+  @doc """
+  Cast a list of maps to a list of Shapes.
+  """
+  @spec cast_all!(module(), map()) :: struct()
+  def cast_all!(shape, data) when is_atom(shape) and is_list(data) do
+    case cast_all(shape, data) do
+      {:ok, structs}    -> structs
       {:error, reason}  -> raise reason
     end
   end

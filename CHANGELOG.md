@@ -9,3 +9,7 @@
 
 * Various fixes to Shape casting
 * Added `:transform` option to `Want.map`, `Want.keywords`, and `Want.shape` field options, allowing a transformation to be applied to cast values.
+
+## 1.15.6 (19.11.2024)
+
+* Adds `Want.Shape.cast_all/2` and `Want.Shape.cast_all!/2`.
