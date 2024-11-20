@@ -13,3 +13,7 @@
 ## 1.15.6 (19.11.2024)
 
 * Adds `Want.Shape.cast_all/2` and `Want.Shape.cast_all!/2`.
+
+## 1.16.0 (20.11.2024)
+
+* Adds `:transform` option support to shape definition.

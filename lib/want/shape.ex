@@ -7,7 +7,7 @@ defmodule Want.Shape do
   @doc false
   defmacro __using__(_) do
     quote do
-      import Want.Shape, only: [shape: 1, field: 1, field: 2, field: 3]
+      import Want.Shape, only: [shape: 1, shape: 2, field: 1, field: 2, field: 3]
 
       @doc """
       Cast incoming data to this Shape.
@@ -75,7 +75,7 @@ defmodule Want.Shape do
   @spec cast(module(), map()) :: {:ok, struct()} | {:error, reason :: term()}
   def cast(shape, data) when is_atom(shape) and is_map(data) do
     with {:ok, m} <- Want.map(data, Map.new(Kernel.apply(shape, :__schema__, []))) do
-      {:ok, Kernel.struct(shape, m)}
+      {:ok, maybe_transform(shape, Kernel.struct(shape, m))}
     end
   end
 
@@ -93,7 +93,7 @@ defmodule Want.Shape do
   @doc """
   Cast a list of maps to a list of Shapes.
   """
-  @spec cast_all(module(), map()) :: {:ok, struct()} | {:error, reason :: term()}
+  @spec cast_all(module(), list(map())) :: {:ok, list(struct())} | {:error, reason :: term()}
   def cast_all(shape, data) when is_atom(shape) and is_list(data) do
     Enum.reduce_while(data, {:ok, []}, fn(data, {:ok, out}) ->
       case cast(shape, data) do
@@ -110,7 +110,7 @@ defmodule Want.Shape do
   @doc """
   Cast a list of maps to a list of Shapes.
   """
-  @spec cast_all!(module(), map()) :: struct()
+  @spec cast_all!(module(), list(map())) :: list(struct())
   def cast_all!(shape, data) when is_atom(shape) and is_list(data) do
     case cast_all(shape, data) do
       {:ok, structs}    -> structs
@@ -118,16 +118,44 @@ defmodule Want.Shape do
     end
   end
 
+  #
+  # Perform any configured transformations on the result of a shape cast.
+  #
+  @spec maybe_transform(module(), struct()) :: struct()
+  defp maybe_transform(shape, out) do
+    with  true                                      <- Kernel.function_exported?(shape, :__transform__, 0),
+          transform when is_function(transform, 1)  <- Kernel.apply(shape, :__transform__, []) do
+      transform.(out)
+    else
+      _ -> out
+    end
+  end
+
   @doc """
-  Define a schema. Generates a struct definition for the current module that includes the data
+  Define a shape schema. Generates a struct definition for the current module that includes the data
   needed to correctly cast incoming JSON/map data into that struct, including field sourcing, type
   conversions, etc.
   """
-  defmacro shape(do: block) do
-    shape(__CALLER__, block)
-  end
+  defmacro shape(do: block),
+    do: shape(__CALLER__, [], block)
 
-  defp shape(caller, block) do
+  @doc """
+  Define a shape schema. Generates a struct definition for the current module that includes the data
+  needed to correctly cast incoming JSON/map data into that struct, including field sourcing, type
+  conversions, etc.
+
+  ## Options
+
+    * `:transform` - A function that accepts the generated shape struct and performs any transformations required. Called after
+    a successful cast.
+
+  """
+  defmacro shape(opts, do: block),
+    do: shape(__CALLER__, opts, block)
+
+  defp shape(caller, opts, block) do
+    transform = opts[:transform]
+
     prelude =
       quote do
         if line = Module.get_attribute(__MODULE__, :want_shape_defined) do
@@ -138,6 +166,8 @@ defmodule Want.Shape do
 
         Module.register_attribute(__MODULE__, :want_shape_fields,   accumulate: true)
         Module.register_attribute(__MODULE__, :want_field_info,     accumulate: true)
+
+        @want_transform unquote(transform)
 
         try do
           import Want.Shape
@@ -156,6 +186,9 @@ defmodule Want.Shape do
 
         def __schema__,
           do: @want_field_info
+
+        def __transform__,
+          do: @want_transform
 
         @type t() :: %__MODULE__{}
       end

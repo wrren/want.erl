@@ -10,7 +10,7 @@ defmodule Want.ShapeTest do
     end
   end
 
-  shape do
+  shape transform: &__MODULE__.shape_transform/1 do
     field :is_valid,    :boolean, default: false
     field :is_integer,  :integer, default: 100
     field :from,        :string, from: "WeirdField", default: "Hello, World!", transform: &String.upcase/1
@@ -18,7 +18,11 @@ defmodule Want.ShapeTest do
     field :multi_from,  :integer, from: [{"a", "b", "c"}, "OtherField"], default: 0
     field :inner,       Want.ShapeTest.Inner, default: nil
     field :inner_array, {:array, Want.ShapeTest.Inner}, from: "list", default: []
+    field :transformed, :integer, default: 1
   end
+
+  def shape_transform(%Want.ShapeTest{transformed: t} = result),
+    do: %{result | transformed: t * 2}
 
   describe "cast/1" do
     test "successfully casts a valid map with present fields" do
@@ -34,7 +38,8 @@ defmodule Want.ShapeTest do
         hello:        :world,
         multi_from:   0,
         inner:        %Want.ShapeTest.Inner{int: 150},
-        inner_array:  []
+        inner_array:  [],
+        transformed:  2
       }
     end
 
@@ -43,7 +48,8 @@ defmodule Want.ShapeTest do
           "is_valid"    => "true",
           "is_integer"  => "1",
           "hello"       => "World",
-          "inner"       => %{"int" => 150}
+          "inner"       => %{"int" => 150},
+          "transformed" => "15"
         },
         %{
           "is_valid"    => "false",
@@ -57,7 +63,8 @@ defmodule Want.ShapeTest do
           hello:        :world,
           multi_from:   0,
           inner:        %Want.ShapeTest.Inner{int: 150},
-          inner_array:  []
+          inner_array:  [],
+          transformed:  30
         },
         %Want.ShapeTest{
           is_valid:     false,
@@ -66,7 +73,8 @@ defmodule Want.ShapeTest do
           hello:        :bar,
           multi_from:   0,
           inner:        %Want.ShapeTest.Inner{int: 250},
-          inner_array:  []
+          inner_array:  [],
+          transformed:  2
         }]
     end
 
@@ -81,7 +89,8 @@ defmodule Want.ShapeTest do
         hello:          :default,
         multi_from:     0,
         inner:          nil,
-        inner_array:    [%Want.ShapeTest.Inner{int: 100}, %Want.ShapeTest.Inner{int: 200}]
+        inner_array:    [%Want.ShapeTest.Inner{int: 100}, %Want.ShapeTest.Inner{int: 200}],
+        transformed:    2
       }
 
       assert Want.ShapeTest.cast!(%{
@@ -93,7 +102,8 @@ defmodule Want.ShapeTest do
         hello:          :default,
         multi_from:     0,
         inner:          nil,
-        inner_array:    []
+        inner_array:    [],
+        transformed:    2
       }
     end
 
@@ -108,7 +118,8 @@ defmodule Want.ShapeTest do
         hello:          :default,
         multi_from:     0,
         inner:          nil,
-        inner_array:    []
+        inner_array:    [],
+        transformed:    2
       }
 
       assert Want.ShapeTest.cast!(%{
@@ -122,7 +133,8 @@ defmodule Want.ShapeTest do
         hello:          :default,
         multi_from:     2,
         inner:          nil,
-        inner_array:    []
+        inner_array:    [],
+        transformed:    2
       }
 
       assert Want.ShapeTest.cast!(%{
@@ -136,7 +148,8 @@ defmodule Want.ShapeTest do
         hello:          :default,
         multi_from:     100,
         inner:          nil,
-        inner_array:    []
+        inner_array:    [],
+        transformed:    2
       }
     end
   end
