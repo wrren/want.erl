@@ -30,10 +30,9 @@ defmodule Want do
   Determine whether the given type name is valid.
   """
   def is_valid_type?({:array, type}),
-    do: Enum.member?(valid_types(), type) or (is_atom(type) and Want.Shape.is_shape?(type))
+    do: Enum.member?(valid_types(), type) or (is_atom(type) and Want.Shape.is_shape?(type)) or (is_atom(type) and Want.Type.is_custom_type?(type))
   def is_valid_type?(type),
-    do: Enum.member?(valid_types(), type) or (is_atom(type) and Want.Shape.is_shape?(type))
-
+    do: Enum.member?(valid_types(), type) or (is_atom(type) and Want.Shape.is_shape?(type)) or (is_atom(type) and Want.Type.is_custom_type?(type))
   @doc """
   Check whether the given type name is valid and raise if not.
   """

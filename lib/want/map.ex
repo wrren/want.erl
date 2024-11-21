@@ -228,19 +228,20 @@ defmodule Want.Map do
     end
   end
   def cast(input, key, opts) when (is_list(input) or (is_map(input) and not is_struct(input))) and is_atom(key) and not is_nil(key) do
-    if Want.Shape.is_shape?(key) do
-      Want.Shape.cast(key, input)
-    else
-      input
-      |> Enum.find(fn
-        {k, _v} when is_atom(k)     -> k == key
-        {k, _v} when is_binary(k)   -> k == Atom.to_string(key)
-        _                           -> false
-      end)
-      |> case do
-        {_, v}  -> cast(v, type(opts), opts)
-        nil     -> {:error, "key #{inspect key} not found"}
-      end
+    cond do
+      Want.Shape.is_shape?(key)       -> Want.Shape.cast(key, input)
+      Want.Type.is_custom_type?(key)  -> Want.Type.cast(key, input, opts)
+      true ->
+        input
+        |> Enum.find(fn
+          {k, _v} when is_atom(k)     -> k == key
+          {k, _v} when is_binary(k)   -> k == Atom.to_string(key)
+          _                           -> false
+        end)
+        |> case do
+          {_, v}  -> cast(v, type(opts), opts)
+          nil     -> {:error, "key #{inspect key} not found"}
+        end
     end
   end
   def cast(input, :boolean, opts),
@@ -265,8 +266,13 @@ defmodule Want.Map do
     do: cast(input, opts)
   def cast(input, :any, _opts),
     do: {:ok, input}
-  def cast(_input, type, _opts),
-    do: {:error, "unknown cast type #{inspect type} specified"}
+  def cast(input, type, opts) do
+    if Want.Type.is_custom_type?(type) do
+      Want.Type.cast(type, input, opts)
+    else
+      {:error, "unknown cast type #{inspect type} specified"}
+    end
+  end
 
   #
   # Attempt to generate a value for a given map key, either using the cast options'

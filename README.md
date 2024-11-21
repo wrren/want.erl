@@ -99,3 +99,24 @@ end
 })
 
 ```
+
+## Custom Types
+
+You can define your own types for `map`, `keyword` and `shape` conversions by implementing the `Want.Type` behaviour, specifically the `cast/2` callback.
+
+```elixir
+defmodule MyCustomType do
+    use Want.Type
+
+    @doc """
+    Capitalizes a binary input.
+    """
+    @spec cast(input :: any(), opts :: Keyword.t()) :: {:ok, String.t()} | {:error, String.t()}
+    def cast(input, opts) when is_binary(input),
+        do: {:ok, opts[:substitute] || String.capitalize(input)}
+    def cast(_input, _opts),
+        do: {:error, "Want.TypeTest can only operate on binaries"}
+end
+
+{:ok, %{hello: "World"}} = Want.map(%{"hello" => "world"}, %{hello: [type: MyCustomType]})
+```
