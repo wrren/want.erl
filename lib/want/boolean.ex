@@ -41,10 +41,12 @@ defmodule Want.Boolean do
   def cast(value, _opts) when is_float(value),
     do: {:ok, value != 0.0}
   def cast(value, _opts) when is_binary(value) do
-    cond do
-      String.downcase(value) == "true"    -> {:ok, true}
-      String.downcase(value) == "false"   -> {:ok, false}
-      true                                -> {:error, "Failed to convert value #{inspect value} to boolean."}
+   case value
+    |> String.trim()
+    |> String.downcase() do
+      value when value in ~w"true t yes y 1" -> {:ok, true}
+      value when value in ~w"false f no n 0" -> {:ok, false}
+      _ -> {:error, "Failed to convert value #{inspect(value)} to boolean."}
     end
   end
   def cast(value, _opts),
