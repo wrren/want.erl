@@ -44,6 +44,10 @@ defmodule Want.Boolean do
     cond do
       String.downcase(value) == "true"    -> {:ok, true}
       String.downcase(value) == "false"   -> {:ok, false}
+      String.downcase(value) == "yes"    -> {:ok, true}
+      String.downcase(value) == "no"   -> {:ok, false}
+      String.downcase(value) == "1"    -> {:ok, true}
+      String.downcase(value) == "0"   -> {:ok, false}
       true                                -> {:error, "Failed to convert value #{inspect value} to boolean."}
     end
   end
