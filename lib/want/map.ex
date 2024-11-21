@@ -227,6 +227,8 @@ defmodule Want.Map do
       nil     -> {:error, "key #{inspect key} not found"}
     end
   end
+  def cast(input, :any, _opts),
+    do: {:ok, input}
   def cast(input, key, opts) when (is_list(input) or (is_map(input) and not is_struct(input))) and is_atom(key) and not is_nil(key) do
     cond do
       Want.Shape.is_shape?(key)       -> Want.Shape.cast(key, input)
@@ -264,8 +266,6 @@ defmodule Want.Map do
     do: Want.Date.cast(input, opts)
   def cast(input, nil, opts) when is_map(opts),
     do: cast(input, opts)
-  def cast(input, :any, _opts),
-    do: {:ok, input}
   def cast(input, type, opts) do
     if Want.Type.is_custom_type?(type) do
       Want.Type.cast(type, input, opts)
