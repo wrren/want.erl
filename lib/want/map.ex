@@ -144,6 +144,8 @@ defmodule Want.Map do
       other         -> other
     end
   end
+  def cast(_, {:array, _type}, opts),
+    do: {:ok, maybe_transform([], opts)}
   def cast(input, schema, opts) when is_map(schema) and (is_list(input) or is_map(input)) and not is_atom(schema) do
     schema
     |> Enum.reduce_while(%{}, fn({key, field_opts}, out) ->
