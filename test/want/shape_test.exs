@@ -22,6 +22,7 @@ defmodule Want.ShapeTest do
     field :map_field,   {:map, :atom, :string}, default: %{}
   end
 
+  @spec shape_transform(Want.ShapeTest.t()) :: Want.ShapeTest.t()
   def shape_transform(%Want.ShapeTest{transformed: t} = result),
     do: %{result | transformed: t * 2}
 

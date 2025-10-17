@@ -179,6 +179,8 @@ defmodule Want.Shape do
 
     postlude =
       quote unquote: false do
+        all_fields = Enum.reverse(@want_field_info)
+
         defstruct Enum.reverse(@want_shape_fields)
 
         def __fields__,
@@ -190,7 +192,13 @@ defmodule Want.Shape do
         def __transform__,
           do: @want_transform
 
-        @type t() :: %__MODULE__{}
+        @type t() :: %__MODULE__{
+          unquote_splicing(
+            Enum.map(all_fields, fn {name, [{:type, type} | _]} ->
+              {name, Want.Type.to_typespec(type)}
+            end)
+          )
+        }
       end
 
     quote do
