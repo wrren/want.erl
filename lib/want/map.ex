@@ -6,6 +6,7 @@ defmodule Want.Map do
   @type input       :: Want.enumerable()
   @type schema      :: map()
   @type key         :: binary() | atom()
+  @type type        :: :atom | :boolean | :date | :datetime | :enum | :float | :integer | {:array, any()} | {:map, any(), any()} | module() | :string
   @type opts        :: Keyword.t()
   @type result      :: {:ok, result :: map()} | {:error, reason :: binary()}
   @type enumerable  :: Want.enumerable()
@@ -128,24 +129,11 @@ defmodule Want.Map do
       {:ok, %{id: 200}}
 
   """
-  @spec cast(value :: input(), schema :: schema()) :: result()
+  @spec cast(input(), schema()) :: result()
   def cast(input, schema),
     do: cast(input, schema, [])
-  @spec cast(value :: input(), schema :: schema(), opts :: Keyword.t()) :: result()
-  def cast(input, {:array, type}, opts) when is_list(input) do
-    Enum.reduce_while(input, {:ok, []}, fn(elem, {:ok, out}) ->
-      case cast(elem, type, opts) do
-        {:ok, value}      -> {:cont, {:ok, [maybe_transform(value, opts) | out]}}
-        {:error, reason}  -> {:halt, {:error, reason}}
-      end
-    end)
-    |> case do
-      {:ok, list}   -> {:ok, Enum.reverse(list)}
-      other         -> other
-    end
-  end
-  def cast(_, {:array, _type}, opts),
-    do: {:ok, maybe_transform([], opts)}
+
+  @spec cast(input(), key() | list(key()) | tuple() | schema(), opts :: keyword()) :: result()
   def cast(input, schema, opts) when is_map(schema) and (is_list(input) or is_map(input)) and not is_atom(schema) do
     schema
     |> Enum.reduce_while(%{}, fn({key, field_opts}, out) ->
@@ -173,8 +161,6 @@ defmodule Want.Map do
         {:error, reason}
     end
   end
-
-  @spec cast(input :: any(), key :: key() | list(key()) | tuple(), opts :: opts() | map()) :: {:ok, result :: any()} | {:error, reason :: binary()}
   def cast(_input, [], _opts),
     do: {:error, "key not found"}
   def cast(input, [key | t], opts) do
@@ -213,7 +199,7 @@ defmodule Want.Map do
         {:halt, {input, :error}}
     end)
     |> case do
-      {v, :ok}      -> cast(v, type(opts), opts)
+      {v, :ok}      -> cast_value(v, type(opts), opts)
       {_v, :error}  -> {:error, :key_not_found}
     end
   end
@@ -224,57 +210,91 @@ defmodule Want.Map do
       {k, _v} when is_binary(k)   -> k == key
       _                           -> false
     end)
+    |> then(fn res -> {res, type(opts), is_map(opts)} end)
     |> case do
-      {_, v}  -> cast(v, type(opts), opts)
-      nil     -> {:error, "key #{inspect key} not found"}
+      {{_, v}, nil, true}     -> cast(v, opts)
+      {{_, v}, type, false}   -> cast_value(v, type, opts)
+      {_, nil, true}          -> {:error, "key #{inspect key} does not specify a type field"}
+      _                       -> {:error, "key #{inspect key} not found"}
     end
   end
   def cast(input, :any, _opts),
     do: {:ok, input}
   def cast(input, key, opts) when (is_list(input) or (is_map(input) and not is_struct(input))) and is_atom(key) and not is_nil(key) do
-    cond do
-      Want.Shape.is_shape?(key)       -> Want.Shape.cast(key, input)
-      Want.Type.is_custom_type?(key)  -> Want.Type.cast(key, input, opts)
-      true ->
-        input
-        |> Enum.find(fn
-          {k, _v} when is_atom(k)     -> k == key
-          {k, _v} when is_binary(k)   -> k == Atom.to_string(key)
-          _                           -> false
-        end)
-        |> case do
-          {_, v}  -> cast(v, type(opts), opts)
-          nil     -> {:error, "key #{inspect key} not found"}
-        end
+    input
+    |> Enum.find(fn
+      {k, _v} when is_atom(k)     -> k == key
+      {k, _v} when is_binary(k)   -> k == Atom.to_string(key)
+      _                           -> false
+    end)
+    |> then(fn res -> {res, type(opts), is_map(opts)} end)
+    |> case do
+      {{_, v}, nil, true}     -> cast(v, opts)
+      {{_, v}, type, false}   -> cast_value(v, type, opts)
+      {_, nil, true}          -> {:error, "key #{inspect key} does not specify a type field"}
+      _                       -> {:error, "key #{inspect key} not found"}
     end
   end
-  def cast(input, :boolean, opts),
+
+  #
+  # Cast a single value to a target type.
+  #
+  @spec cast_value(any(), type(), keyword()) :: {:ok, any()} | {:error, reason :: term()}
+  defp cast_value(input, :boolean, opts),
     do: Want.Boolean.cast(input, opts)
-  def cast(input, :integer, opts),
+  defp cast_value(input, :integer, opts),
     do: Want.Integer.cast(input, opts)
-  def cast(input, :string, opts),
+  defp cast_value(input, :string, opts),
     do: Want.String.cast(input, opts)
-  def cast(input, :float, opts),
+  defp cast_value(input, :float, opts),
     do: Want.Float.cast(input, opts)
-  def cast(input, :atom, opts),
+  defp cast_value(input, :atom, opts),
     do: Want.Atom.cast(input, opts)
-  def cast(input, :sort, opts),
+  defp cast_value(input, :sort, opts),
     do: Want.Sort.cast(input, opts)
-  def cast(input, :enum, opts),
+  defp cast_value(input, :enum, opts),
     do: Want.Enum.cast(input, opts)
-  def cast(input, :datetime, opts),
+  defp cast_value(input, :datetime, opts),
     do: Want.DateTime.cast(input, opts)
-  def cast(input, :date, opts),
+  defp cast_value(input, :date, opts),
     do: Want.Date.cast(input, opts)
-  def cast(input, nil, opts) when is_map(opts),
-    do: cast(input, opts)
-  def cast(input, type, opts) do
-    if Want.Type.is_custom_type?(type) do
-      Want.Type.cast(type, input, opts)
-    else
-      {:error, "unknown cast type #{inspect type} specified"}
+  defp cast_value(input, {:array, type}, opts) when is_list(input) do
+    Enum.reduce_while(input, {:ok, []}, fn(elem, {:ok, out}) ->
+      case cast_value(elem, type, opts) do
+        {:ok, value}      -> {:cont, {:ok, [maybe_transform(value, opts) | out]}}
+        {:error, reason}  -> {:halt, {:error, reason}}
+      end
+    end)
+    |> case do
+      {:ok, list}   -> {:ok, Enum.reverse(list)}
+      other         -> other
     end
   end
+  defp cast_value(_, {:array, _type}, opts),
+    do: {:ok, maybe_transform([], opts)}
+  defp cast_value(input, {:map, key_type, value_type}, opts) when is_map(input) do
+    Enum.reduce_while(input, {:ok, %{}}, fn({key, value}, {:ok, map}) ->
+      with  {:ok, key}          <- cast(key, key_type, []),
+            {:ok, value}        <- cast(value, value_type) do
+        {:cont, {:ok, Map.put(map, key, maybe_transform(value, opts))}}
+      else
+        {:error, reason} -> {:halt, {:error, reason}}
+      end
+    end)
+  end
+  defp cast_value(_, {:map, _key_type, _value_type}, opts),
+    do: {:ok, maybe_transform(%{}, opts)}
+  defp cast_value(input, :any, opts),
+    do: {:ok, maybe_transform(input, opts)}
+  defp cast_value(input, type, opts) when is_atom(type) do
+    cond do
+      Want.Shape.is_shape?(type)        -> Want.Shape.cast(type, input)
+      Want.Type.is_custom_type?(type)   -> Want.Type.cast(type, input, opts)
+      true                              -> {:error, "unknown cast type #{inspect type} specified"}
+    end
+  end
+  defp cast_value(_input, type, _opts),
+    do: {:error, "unknown cast type #{inspect type} specified"}
 
   #
   # Attempt to generate a value for a given map key, either using the cast options'

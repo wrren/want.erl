@@ -52,6 +52,8 @@ defmodule Want.List do
     case {opts[:element], Keyword.get(Keyword.get(opts, :element, []), :type)} do
       {nil, _} ->
         {:ok, value}
+      {o, :any} ->
+        {:ok, cast_elements(value, Want.Any, o)}
       {o, :enum} ->
         {:ok, cast_elements(value, Want.Enum, o)}
       {o, :integer} ->
