@@ -1,16 +1,38 @@
 on:
-  push:
-    tags:
-      - '*'
+    push:
+        tags:
+            - "*"
 
 jobs:
-  publish:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out
-        uses: actions/checkout@v2
+    publish:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout Code
+              uses: actions/checkout@v4
 
-      - name: Publish to Hex.pm
-        uses: erlangpack/github-action@v3
-        env:
-          HEX_API_KEY: ${{ secrets.HEX_API_KEY }}
+            - name: Setup Erlang and Elixir
+              uses: erlef/setup-beam@v1.17
+              with:
+                  elixir-version: "1.17.2"
+                  otp-version: "27.0"
+
+            - name: Restore Dependencies Cache
+              uses: actions/cache@v4
+              with:
+                  path: deps
+                  key: ${{ runner.os }}-mix-${{ hashFiles('**/mix.lock') }}
+                  restore-keys: ${{ runner.os }}-mix-
+
+            - name: Get Dependencies
+              run: mix deps.get
+
+            - name: Build Project
+              run: mix compile --warnings-as-errors
+
+            - name: Run Tests
+              run: mix test
+
+            - name: Publish to Hex
+              env:
+                  HEX_API_KEY: ${{ secrets.HEX_API_KEY }}
+              run: mix hex.publish --yes

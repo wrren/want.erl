@@ -1,41 +1,37 @@
 on:
-  pull_request:
-  push:
-    branches:
-      - main
+    pull_request:
+    push:
+        branches:
+            - main
 
 jobs:
-  test:
-    name: Build & Test
-    runs-on: ubuntu-latest
-    env:
-      MIX_ENV: test
+    test:
+        name: Build & Test
+        runs-on: ubuntu-latest
+        env:
+            MIX_ENV: test
 
-    steps:
-      - uses: actions/checkout@v4
+        steps:
+            - uses: actions/checkout@v4
 
-      - name: Setup Erlang and Elixir
-        uses: erlef/setup-beam@v1.17
-        with:
-          elixir-version: "1.16.0-otp-26"
-          otp-version: "26.0"
+            - name: Setup Erlang and Elixir
+              uses: erlef/setup-beam@v1.17
+              with:
+                  elixir-version: "1.17.2"
+                  otp-version: "27.0"
 
-      - name: Mix and build cache
-        uses: actions/cache@v4
-        with:
-          path: |
-            deps
-            _build
-          key: ${{ runner.os }}-mix-${{ hashFiles('**/mix.lock') }}
-          restore-keys: ${{ runner.os }}-mix-
+            - name: Restore Dependencies Cache
+              uses: actions/cache@v4
+              with:
+                  path: deps
+                  key: ${{ runner.os }}-mix-${{ hashFiles('**/mix.lock') }}
+                  restore-keys: ${{ runner.os }}-mix-
 
-      - name: Get Dependencies
-        run: mix deps.get
+            - name: Get Dependencies
+              run: mix deps.get
 
-      - name: Build Project
-        run: |
-          mix compile --warnings-as-errors
+            - name: Build Project
+              run: mix compile --warnings-as-errors
 
-      - name: Run Tests
-        run: |
-          mix test
+            - name: Run Tests
+              run: mix test
