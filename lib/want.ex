@@ -31,8 +31,11 @@ defmodule Want do
   """
   def is_valid_type?({:array, type}),
     do: Enum.member?(valid_types(), type) or (is_atom(type) and Want.Shape.is_shape?(type)) or (is_atom(type) and Want.Type.is_custom_type?(type))
+  def is_valid_type?({:map, key_type, value_type}) when key_type in [:atom, :string, :enum],
+    do: Enum.member?(valid_types(), value_type) or (is_atom(value_type) and Want.Shape.is_shape?(value_type)) or (is_atom(value_type) and Want.Type.is_custom_type?(value_type))
   def is_valid_type?(type),
     do: Enum.member?(valid_types(), type) or (is_atom(type) and Want.Shape.is_shape?(type)) or (is_atom(type) and Want.Type.is_custom_type?(type))
+
   @doc """
   Check whether the given type name is valid and raise if not.
   """

@@ -274,8 +274,8 @@ defmodule Want.Map do
     do: {:ok, maybe_transform([], opts)}
   defp cast_value(input, {:map, key_type, value_type}, opts) when is_map(input) do
     Enum.reduce_while(input, {:ok, %{}}, fn({key, value}, {:ok, map}) ->
-      with  {:ok, key}          <- cast(key, key_type, []),
-            {:ok, value}        <- cast(value, value_type) do
+      with  {:ok, key}          <- cast_value(key, key_type, []),
+            {:ok, value}        <- cast_value(value, value_type, []) do
         {:cont, {:ok, Map.put(map, key, maybe_transform(value, opts))}}
       else
         {:error, reason} -> {:halt, {:error, reason}}
