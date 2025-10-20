@@ -53,6 +53,27 @@ defmodule Want.ShapeTest do
       }
     end
 
+    test "successfully casts a valid map with nil fields" do
+      assert Want.ShapeTest.cast!(%{
+        "is_valid"    => "true",
+        "is_integer"  => "1",
+        "hello"       => "World",
+        "inner"       => nil,
+        "inner_array" => nil,
+        "map_field"   => nil
+      }) == %Want.ShapeTest{
+        is_valid:     true,
+        is_integer:   1,
+        from:         "HELLO, WORLD!",
+        hello:        :world,
+        multi_from:   0,
+        inner:        nil,
+        inner_array:  [],
+        transformed:  2,
+        map_field:    %{}
+      }
+    end
+
     test "successfully casts a list of valid maps with present fields" do
       assert Want.ShapeTest.cast_all!([%{
           "is_valid"    => "true",

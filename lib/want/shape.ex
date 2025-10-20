@@ -78,6 +78,8 @@ defmodule Want.Shape do
       {:ok, maybe_transform(shape, Kernel.struct(shape, m))}
     end
   end
+  def cast(_shape, _),
+    do: {:error, "invalid data for shape cast"}
 
   @doc """
   Cast incoming data based on a Shape definition. Raises on error.
