@@ -11,7 +11,7 @@ in `mix.exs`:
 
 ```elixir
 def deps do
-  [{:want, "~> 1.14"}]
+  [{:want, "~> 1.21"}]
 end
 ```
 
