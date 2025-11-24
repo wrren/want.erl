@@ -33,7 +33,11 @@ defmodule Want.DateTime do
       opts[:decode] == :uri ->
         cast(URI.decode(input), Keyword.delete(opts, :decode))
       true ->
-        cast(DateTime.from_iso8601(input), opts)
+        case DateTime.from_iso8601(input) do
+          {:error, :missing_offset} ->
+            cast(NaiveDateTime.from_iso8601(input), opts)
+          other -> cast(other, opts)
+        end
     end
   end
   def cast(input, opts) when is_integer(input) and is_list(opts) do
@@ -56,6 +60,8 @@ defmodule Want.DateTime do
     do: {:ok, datetime}
   def cast({:ok, datetime, _offset}, _opts),
     do: {:ok, datetime}
+  def cast({:error, :missing_offset}, _opts) do
+  end
   def cast({:error, reason}, _opts),
     do: {:error, reason}
   def cast({:ambiguous, _, _}, _opts),
