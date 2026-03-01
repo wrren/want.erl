@@ -7,7 +7,7 @@ defmodule Want.Keyword do
   @type schema      :: map()
   @type key         :: binary() | atom()
   @type opts        :: Keyword.t()
-  @type result      :: {:ok, result :: Keyword.t()} | {:error, reason :: binary()}
+  @type result      :: {:ok, result :: Keyword.t()} | {:error, reason :: binary() | map()}
   @type enumerable  :: Want.enumerable()
 
   defimpl Want.Dump, for: List do
@@ -58,27 +58,41 @@ defmodule Want.Keyword do
   end
 
   @doc """
-  Cast an incoming keyword list or map to an output keyword list using the
-  provided schema to control conversion rules and validations.
+  Cast an incoming keyword list or map to an output keyword list using the provided schema to control
+  conversion rules and validations. Each value in the schema map represents conversion options.
+
+  Specify a :type field to cast the input value for a given key to that type, defaults to :string.
+  Specific conversion and validation options for each type corresponds to those available
+  for `Want.integer/2`, `Want.float/2`, `Want.string/2` and `Want.atom/2`.
+
+  Keyword lists can be nested by using a new schema map as a value in a parent schema. The field from which
+  a given value is derived can also be modified using the `:from` option.
+
+  ## Options
+
+    * `:merge` - Provide a keyword list matching the given schema that contains default values to be
+      used if the input value does not contain a particular field.
+    * `:collect_errors` - If true, all field errors are accumulated into a `%{field => reason}`
+      map and returned as `{:error, errors}` rather than halting on the first failure.
+    * `:unknown` - Controls handling of input keys not present in the schema.
+      `:ignore` (default) discards them. `:error` returns an error if any are present.
+      `:include` passes atom-keyed unknowns through to the output keyword list.
 
   ## Examples
 
       iex> Want.Keyword.cast(%{"id" => 1}, %{id: [type: :integer]})
       {:ok, [id: 1]}
 
-      iex> Want.Keyword.cast(%{"archived" => "true"}, %{archived: [type: :boolean, default: false]})
-      {:ok, [archived: true]}
-
-      iex> Want.Keyword.cast(%{"archived" => "false"}, %{archived: [type: :boolean, default: false]})
-      {:ok, [archived: false]}
-
-      iex> Want.Keyword.cast(%{}, %{archived: [type: :boolean, default: false]})
-      {:ok, [archived: false]}
+      iex> Want.Keyword.cast(%{"identifier" => 1}, %{id: [type: :integer, from: :identifier]})
+      {:ok, [id: 1]}
 
       iex> Want.Keyword.cast(%{}, %{id: [type: :integer, default: 1]})
       {:ok, [id: 1]}
 
       iex> Want.Keyword.cast(%{"id" => "bananas"}, %{id: [type: :integer, default: 1]})
+      {:ok, [id: 1]}
+
+      iex> Want.Keyword.cast(%{"identifier" => "bananas"}, %{id: [type: :integer, default: 1, from: :identifier]})
       {:ok, [id: 1]}
 
       iex> Want.Keyword.cast(%{"hello" => "world", "foo" => "bar"}, %{hello: [], foo: [type: :atom]})
@@ -135,31 +149,38 @@ defmodule Want.Keyword do
     end
   end
   def cast(input, schema, opts) when is_map(schema) and (is_list(input) or is_map(input)) and not is_atom(schema) do
-    schema
-    |> Enum.reduce_while([], fn({key, field_opts}, out) ->
-      with  {:error, reason}      <- cast(input, field_opts[:from] || key, field_opts),
-            {false, _reason}      <- {is_map(field_opts), reason},
-            {{:ok, default}, _}   <- {merge_or_default(key, field_opts, opts), reason} do
-        {:cont, Keyword.put(out, key, maybe_transform(default, field_opts))}
-      else
-        {:ok, value} ->
-          {:cont, Keyword.put(out, key, maybe_transform(value, field_opts))}
-        {true, reason} ->
-          {:halt, {:error, "Failed to cast key #{key} to map: #{reason}"}}
-        {{:error, :no_default}, reason} ->
-          if field_opts[:required] do
-            {:halt, {:error, "Failed to cast key #{key} (#{reason}) and no default value provided."}}
-          else
-            {:cont, out}
+    collect_errors = Keyword.get(opts, :collect_errors, false)
+
+    cast_result =
+      if collect_errors do
+        schema
+        |> Enum.reduce({[], %{}}, fn({key, field_opts}, {out, errors}) ->
+          case cast_field(input, key, field_opts, opts) do
+            {:ok, value}     -> {Keyword.put(out, key, value), errors}
+            :skip            -> {out, errors}
+            {:error, reason} -> {out, Map.put(errors, key, reason)}
           end
+        end)
+        |> case do
+          {result, errors} when map_size(errors) == 0 -> {:ok, result}
+          {_, errors}                                  -> {:error, errors}
+        end
+      else
+        schema
+        |> Enum.reduce_while([], fn({key, field_opts}, out) ->
+          case cast_field(input, key, field_opts, opts) do
+            {:ok, value}     -> {:cont, Keyword.put(out, key, value)}
+            :skip            -> {:cont, out}
+            {:error, reason} -> {:halt, {:error, reason}}
+          end
+        end)
+        |> case do
+          result when is_list(result) -> {:ok, result}
+          {:error, _} = err           -> err
+        end
       end
-    end)
-    |> case do
-      result when is_list(result) ->
-        {:ok, result}
-      {:error, reason} ->
-        {:error, reason}
-    end
+
+    apply_unknown(cast_result, input, schema, opts)
   end
 
   @spec cast(input :: any(), key :: key() | list(key()), opts :: opts() | map()) :: {:ok, result :: any()} | {:error, reason :: binary()}
@@ -263,6 +284,118 @@ defmodule Want.Keyword do
       {:error, "unknown cast type #{inspect type} specified"}
     end
   end
+
+  #
+  # Cast and validate a single schema field, returning {:ok, value}, :skip, or {:error, reason}.
+  #
+  defp cast_field(input, key, field_opts, cast_opts) do
+    collect_errors = Keyword.get(cast_opts, :collect_errors, false)
+
+    case cast(input, field_opts[:from] || key, field_opts) do
+      {:ok, value} ->
+        value
+        |> maybe_transform(field_opts)
+        |> apply_validate(field_opts)
+
+      {:error, reason} when is_map(field_opts) ->
+        {:error, "Failed to cast key #{key} to map: #{reason}"}
+
+      {:error, reason} ->
+        case merge_or_default(key, field_opts, cast_opts) do
+          {:ok, default} ->
+            {:ok, maybe_transform(default, field_opts)}
+
+          {:error, :no_default} ->
+            if field_opts[:required] do
+              {:error, "Failed to cast key #{key} (#{reason}) and no default value provided."}
+            else
+              if collect_errors and not key_not_found_error?(reason) do
+                {:error, reason}
+              else
+                :skip
+              end
+            end
+        end
+    end
+  end
+
+  defp key_not_found_error?(:key_not_found), do: true
+  defp key_not_found_error?(reason) when is_binary(reason), do: String.ends_with?(reason, "not found")
+  defp key_not_found_error?(_), do: false
+
+  defp apply_validate(value, opts) when is_list(opts) do
+    case opts[:validate] do
+      nil ->
+        {:ok, value}
+      f when is_function(f, 1) ->
+        case f.(value) do
+          :ok              -> {:ok, value}
+          true             -> {:ok, value}
+          {:ok, result}    -> {:ok, result}
+          false            -> {:error, "Validation failed for value #{inspect(value)}."}
+          {:error, _} = e  -> e
+        end
+      _ ->
+        {:ok, value}
+    end
+  end
+  defp apply_validate(value, _opts), do: {:ok, value}
+
+  defp apply_unknown({:error, _} = err, _input, _schema, _opts), do: err
+  defp apply_unknown({:ok, output} = result, input, schema, opts) do
+    case Keyword.get(opts, :unknown, :ignore) do
+      :ignore ->
+        result
+
+      :error ->
+        case unknown_keys(input, schema) do
+          []   -> result
+          keys -> {:error, "Unexpected keys in input: #{inspect(keys)}"}
+        end
+
+      :include ->
+        known = MapSet.new(known_source_keys(schema))
+        extra =
+          Enum.reduce(input, [], fn
+            {k, v}, acc when is_atom(k) ->
+              if MapSet.member?(known, Atom.to_string(k)), do: acc, else: Keyword.put(acc, k, v)
+            _, acc ->
+              acc
+          end)
+        {:ok, output ++ extra}
+
+      _ ->
+        result
+    end
+  end
+
+  defp unknown_keys(input, schema) do
+    known = MapSet.new(known_source_keys(schema))
+    input
+    |> Enum.map(fn {k, _} -> k end)
+    |> Enum.reject(fn k -> MapSet.member?(known, to_string_key(k)) end)
+  end
+
+  defp known_source_keys(schema) do
+    Enum.flat_map(schema, fn {key, field_opts} ->
+      froms =
+        case field_opts do
+          opts when is_list(opts) ->
+            opts |> Keyword.get(:from, key) |> List.wrap()
+          _ ->
+            [key]
+        end
+
+      Enum.flat_map(froms, fn
+        f when is_tuple(f) -> [to_string_key(elem(f, 0))]
+        f                  -> [to_string_key(f)]
+      end)
+    end)
+  end
+
+  defp to_string_key(k) when is_atom(k),   do: Atom.to_string(k)
+  defp to_string_key(k) when is_binary(k), do: k
+  defp to_string_key(k),                   do: inspect(k)
 
   #
   # Attempt to generate a value for a given key, either using the cast options'

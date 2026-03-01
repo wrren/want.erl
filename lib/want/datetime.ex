@@ -4,12 +4,10 @@ defmodule Want.DateTime do
   """
   @type t() :: DateTime.t()
 
-  @type result      :: {:ok, t()} | {:error, binary()} | {:error, atom()} | {:gap, t(), t()} | {:ambiguous, t(), t()}
+  @type result      :: {:ok, t()} | {:error, binary()} | {:error, atom()}
 
   @doc """
   Cast an input to a DateTime.
-
-  ## Options
 
   ## Options
 
@@ -60,8 +58,8 @@ defmodule Want.DateTime do
     do: {:ok, datetime}
   def cast({:ok, datetime, _offset}, _opts),
     do: {:ok, datetime}
-  def cast({:error, :missing_offset}, _opts) do
-  end
+  def cast({:error, :missing_offset}, _opts),
+    do: {:error, :missing_offset}
   def cast({:error, reason}, _opts),
     do: {:error, reason}
   def cast({:ambiguous, _, _}, _opts),

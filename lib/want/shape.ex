@@ -7,7 +7,7 @@ defmodule Want.Shape do
   @doc false
   defmacro __using__(_) do
     quote do
-      import Want.Shape, only: [shape: 1, shape: 2, field: 1, field: 2, field: 3]
+      import Want.Shape, only: [shape: 1, shape: 2, field: 1, field: 2, field: 3, embeds: 2]
 
       @doc """
       Cast incoming data to this Shape.
@@ -17,11 +17,25 @@ defmodule Want.Shape do
         do: Want.Shape.cast(__MODULE__, data)
 
       @doc """
+      Cast incoming data to this Shape, forwarding options to the underlying `Want.map/3` call.
+      """
+      @spec cast(map(), opts :: Keyword.t()) :: {:ok, t()} | {:error, reason :: term()}
+      def cast(data, opts),
+        do: Want.Shape.cast(__MODULE__, data, opts)
+
+      @doc """
       Cast incoming data to this Shape. Raises on error.
       """
       @spec cast!(map()) :: t()
       def cast!(data),
         do: Want.Shape.cast!(__MODULE__, data)
+
+      @doc """
+      Cast incoming data to this Shape, forwarding options to the underlying `Want.map/3` call. Raises on error.
+      """
+      @spec cast!(map(), opts :: Keyword.t()) :: t()
+      def cast!(data, opts),
+        do: Want.Shape.cast!(__MODULE__, data, opts)
 
       @doc """
       Cast a list of maps to a list of Shapes.
@@ -59,6 +73,41 @@ defmodule Want.Shape do
     end
   end
 
+  @doc """
+  Define an embedded shape within a shape. Generates a nested module and registers a field
+  of that module's type.
+
+  ## Example
+
+      defmodule MyOrder do
+        use Want.Shape
+
+        shape do
+          field   :id,      :integer
+          embeds  :address do
+            field :street, :string
+            field :city,   :string
+          end
+        end
+      end
+
+  """
+  defmacro embeds(name, do: block) do
+    embed_module = Module.concat(__CALLER__.module, name |> Atom.to_string() |> Macro.camelize())
+
+    quote do
+      defmodule unquote(embed_module) do
+        use Want.Shape
+
+        shape do
+          unquote(block)
+        end
+      end
+
+      Want.Shape.__field__(__MODULE__, unquote(name), unquote(embed_module), [])
+    end
+  end
+
   @doc false
   def __field__(mod, name, type, opts \\ []) do
     if Want.is_valid_type?(type) do
@@ -73,20 +122,28 @@ defmodule Want.Shape do
   Cast incoming data based on a Shape definition.
   """
   @spec cast(module(), map()) :: {:ok, struct()} | {:error, reason :: term()}
-  def cast(shape, data) when is_atom(shape) and is_map(data) do
-    with {:ok, m} <- Want.map(data, Map.new(Kernel.apply(shape, :__schema__, []))) do
+  def cast(shape, data),
+    do: cast(shape, data, [])
+
+  @spec cast(module(), map(), opts :: Keyword.t()) :: {:ok, struct()} | {:error, reason :: term()}
+  def cast(shape, data, opts) when is_atom(shape) and is_map(data) do
+    with {:ok, m} <- Want.map(data, Map.new(Kernel.apply(shape, :__schema__, [])), opts) do
       {:ok, maybe_transform(shape, Kernel.struct(shape, m))}
     end
   end
-  def cast(_shape, _),
+  def cast(_shape, _data, _opts),
     do: {:error, "invalid data for shape cast"}
 
   @doc """
   Cast incoming data based on a Shape definition. Raises on error.
   """
   @spec cast!(module(), map()) :: struct()
-  def cast!(shape, data) when is_atom(shape) and is_map(data) do
-    case cast(shape, data) do
+  def cast!(shape, data),
+    do: cast!(shape, data, [])
+
+  @spec cast!(module(), map(), opts :: Keyword.t()) :: struct()
+  def cast!(shape, data, opts) when is_atom(shape) and is_map(data) do
+    case cast(shape, data, opts) do
       {:ok, struct}     -> struct
       {:error, reason}  -> raise reason
     end

@@ -10,6 +10,12 @@ jobs:
             - name: Checkout Code
               uses: actions/checkout@v4
 
+            - name: Set version from tag
+              run: |
+                  VERSION="${{ github.ref_name }}"
+                  VERSION="${VERSION#v}"
+                  sed -i "s/@version[[:space:]]*\"[^\"]*\"/@version    \"${VERSION}\"/" mix.exs
+
             - name: Setup Erlang and Elixir
               uses: erlef/setup-beam@v1.17
               with:

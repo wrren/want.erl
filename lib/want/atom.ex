@@ -13,6 +13,12 @@ defmodule Want.Atom do
 
     * `:exists` - If true, only convert to an atom if a matching atom already exists.
 
+  > #### Atom exhaustion {: .warning}
+  >
+  > Without `exists: true`, this function calls `String.to_atom/1`, which creates a new
+  > atom that is never garbage collected. Avoid calling this on untrusted external input.
+  > Prefer `exists: true` or `Want.Enum` when the set of valid atoms is known.
+
   ## Examples
 
       iex> Want.Atom.cast("hello")
@@ -36,7 +42,8 @@ defmodule Want.Atom do
     do: {:ok, value}
   def cast(value, opts) when is_integer(value) or is_float(value) do
     case Want.String.cast(value) do
-      {:ok, value} -> cast(value, opts)
+      {:ok, value}      -> cast(value, opts)
+      {:error, _} = err -> err
     end
   end
   def cast(value, [{:exists, true} | t]) when is_binary(value) do

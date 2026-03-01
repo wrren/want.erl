@@ -30,7 +30,7 @@ defmodule Want.Date do
     end
   end
   def cast({year, month, day}, opts) when is_integer(year) and is_integer(month) and is_integer(day),
-    do: cast(Date.from_erl({year, month, day}, Calendar.get_time_zone_database()), opts)
+    do: cast(Date.from_erl({year, month, day}), opts)
   def cast({:ok, %Date{} = date}, opts),
     do: cast(date, opts)
   def cast(%Date{} = date, _opts),
